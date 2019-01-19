@@ -1,3 +1,3 @@
-all: main.c
+all: main.c tape.h
 	gcc -o tapedeck.out main.c -lpulse-simple -lpulse
 

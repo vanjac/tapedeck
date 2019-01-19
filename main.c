@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <pulse/simple.h>
 #include <pulse/error.h>
+#include "tape.h"
 
 #define BUFFER_SIZE 1024
 // affects playback latency
@@ -9,7 +10,7 @@
 #define RECORD_BUFFER_SIZE 2048
 
 
-int main(int argc, char*argv[]) {
+int main(int argc, char *argv[]) {
     static const pa_sample_spec sample_spec = {
         .format = PA_SAMPLE_S16LE,
         .rate = 44100,
