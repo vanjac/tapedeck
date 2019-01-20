@@ -1,10 +1,10 @@
+#include "main.h"
 #include <stdio.h>
 #include <pulse/simple.h>
 #include <pulse/error.h>
 #include "tape.h"
 #include "instinct.h"
 
-#define BUFFER_SIZE 1024
 // affects playback latency
 #define PLAYBACK_BUFFER_SIZE 4096
 // affects record latency
