@@ -1,3 +1,6 @@
-all: main.c instinct.h tape.h
-	gcc -o tapedeck.out main.c -lpulse-simple -lpulse
+HFILES = instinct.h interface.h tape.h
+CFILES = instinct.c interface.c main.c
+
+all: $(HFILES) $(CFILES)
+	gcc -o tapedeck.out $(CFILES) -lpulse-simple -lpulse
 
