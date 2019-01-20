@@ -1,7 +1,7 @@
 #include <stdbool.h>
 
 // https://www.alsa-project.org/main/index.php/ALSA_Library_API
-#define MIDI_DEVICE "/dev/snd/midiC1D0"
+#define MIDI_DEVICE "/dev/snd/midiC0D0"
 
 /* BUTTONS */
 // (also for LED outputs)
@@ -77,4 +77,6 @@ long control_values[NUM_CONTROLS];
 int instinct_open(void);
 void instinct_close(void);
 int instinct_update(void);
+
+void set_led(int led, bool state);
 

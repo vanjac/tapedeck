@@ -6,7 +6,7 @@ int tape_init(Tape * tape) {
     tape->audio_data = malloc(TAPE_SIZE);
     if (!(tape->audio_data))
         return 1;
-    tape->pt_head = 0;
+    tape->pt_head = tape->audio_data;
     tape->is_playing = false;
     tape->record = false;
     tape->mute = false;

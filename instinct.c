@@ -51,10 +51,13 @@ void interpret_midi_message(unsigned char b1, unsigned char b2, unsigned char b3
             button_pressed(b2);
         } else {
             button_presses[b2] = 0;
-            button_released(b2);
         }
     } else if (b1 == 176) { // control event
         control_values[b2] = b3;
         control_changed(b2, b3);
     }
+}
+
+void set_led(int led, bool state) {
+    printf("Set led %d to %d\n", led, state);
 }
