@@ -1,0 +1,9 @@
+https://wiki.archlinux.org/index.php/USB_MIDI_keyboards
+
+$ lsusb
+Bus 001 Device 007: ID 06f8:b111 Guillemot Corp.
+
+$ aconnect -i
+client 20: 'Hercules DJControl Instinct' [type=kernel,card=1]
+    0 'Hercules DJControl Instinct MID'
+
