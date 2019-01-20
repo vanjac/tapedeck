@@ -1,5 +1,8 @@
 #include <stdbool.h>
 
+// https://www.alsa-project.org/main/index.php/ALSA_Library_API
+#define MIDI_DEVICE "/dev/snd/midiC1D0"
+
 /* BUTTONS */
 // (also for LED outputs)
 

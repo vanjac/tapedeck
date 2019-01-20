@@ -6,9 +6,6 @@
 #include <time.h>
 #include "interface.h"
 
-// https://www.alsa-project.org/main/index.php/ALSA_Library_API
-#define MIDI_DEVICE "/dev/snd/midiC1D0"
-
 int midi_fd;
 
 void interpret_midi_message(unsigned char b1, unsigned char b2, unsigned char b3);
