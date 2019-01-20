@@ -13,3 +13,6 @@ void control_changed(int control, int value) {
     printf("Control %d set to %d\n", control, value);
 }
 
+int interface_update(void) {
+    return 0;
+}

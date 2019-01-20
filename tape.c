@@ -14,6 +14,7 @@ int tape_init(Tape * tape) {
     tape->out_point_action = OUT_CONTINUE;
     tape->volume = 1.0;
     tape->jog_flag = false;
+    return 0;
 }
 
 void tape_destroy(Tape * tape) {
