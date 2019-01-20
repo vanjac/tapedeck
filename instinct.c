@@ -11,7 +11,7 @@ int midi_fd;
 void interpret_midi_message(unsigned char b1, unsigned char b2, unsigned char b3);
 
 int instinct_open(void) {
-    midi_fd = open(MIDI_DEVICE, O_RDONLY | O_NONBLOCK);
+    midi_fd = open(MIDI_DEVICE, O_RDWR | O_NONBLOCK);
     if (midi_fd == -1) {
         fprintf(stderr, "Couldn't open midi device %s\n", MIDI_DEVICE);
         return 1;
@@ -59,5 +59,9 @@ void interpret_midi_message(unsigned char b1, unsigned char b2, unsigned char b3
 }
 
 void set_led(int led, bool state) {
-    printf("Set led %d to %d\n", led, state);
+    unsigned char midi_message[3];
+    midi_message[0] = 144; // note event
+    midi_message[1] = led;
+    midi_message[2] = state ? 127 : 0;
+    write(midi_fd, &midi_message, sizeof(midi_message));
 }
