@@ -30,24 +30,24 @@
 #define BTN_DECK_CUE_KP2    13
 #define BTN_DECK_CUE_KP3    14
 #define BTN_DECK_CUE_KP4    15
-#define BTN_DECK_PBM        16 // pitch bend minus
-#define BTN_DECK_PBP        17
-#define BTN_DECK_PREV       18
-#define BTN_DECK_NEXT       19
+#define BTN_DECK_PBM        16 // NO LED pitch bend minus
+#define BTN_DECK_PBP        17 // NO LED
+#define BTN_DECK_PREV       18 // NO LED
+#define BTN_DECK_NEXT       19 // NO LED
 #define BTN_DECK_CUE        20
 #define BTN_DECK_PLAY       21
 #define BTN_DECK_SYNC       22
-#define BTN_DECK_LISTEN     23
-#define BTN_DECK_LOAD       24
-#define BTN_DECK_TOUCH      25 // press jog wheel
+#define BTN_DECK_LISTEN     23 // (preview)
+#define BTN_DECK_LOAD       24 // NO LED
+#define BTN_DECK_TOUCH      25 // NO LED press jog wheel
 
 #define BTN_SCRATCH         53 // vinyl
-#define BTN_UP              54
-#define BTN_DOWN            55
+#define BTN_UP              54 // NO LED
+#define BTN_DOWN            55 // NO LED
 #define BTN_FILES           56
 #define BTN_FOLDERS         57
-#define BTN_HP_VOL_M        64 // headphone volume minus
-#define BTN_HP_VOL_P        65
+#define BTN_HP_VOL_M        64 // NO LED headphone volume minus
+#define BTN_HP_VOL_P        65 // NO LED
 
 /* CONTROLS */
 
