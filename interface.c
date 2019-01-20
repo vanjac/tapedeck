@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "instinct.h"
 #include "tape.h"
+#include "main.h"
 
 void tape_button_pressed(Tape * tape, int deck_button, int button);
 void tape_control_changed(Tape * tape, int button, int value);
@@ -18,10 +19,30 @@ void button_pressed(int button) {
         return;
     }
     printf("Other note on %d\n", button);
+    switch (button) {
+    case BTN_SCRATCH:
+        printf("Audio in mute toggle\n");
+        audio_in_mute = !audio_in_mute;
+        set_led(button, audio_in_mute);
+        break;
+    }
 }
 
 void control_changed(int control, int value) {
     printf("Control %d set to %d\n", control, value);
+    switch (control) {
+    case CTL_VOL_DA:
+        printf("Tape A volume\n");
+        tape_a.volume = (float)value / 127.0;
+        break;
+    case CTL_VOL_DB:
+        printf("Tape B volume\n");
+        tape_b.volume = (float)value / 127.0;
+        break;
+    case CTL_XFADER:
+        printf("Audio in volume\n");
+        audio_in_volume = (float)value / 127.0;
+    }
 }
 
 void tape_button_pressed(Tape * tape, int deck_button, int button) {
@@ -40,6 +61,11 @@ void tape_button_pressed(Tape * tape, int deck_button, int button) {
         printf("Tape loopback toggle\n");
         tape->loopback = !tape->loopback;
         set_led(button, tape->loopback);
+        break;
+    case BTN_DECK_LISTEN:
+        printf("Tape mute toggle\n");
+        tape->mute = !tape->mute;
+        set_led(button, tape->mute);
         break;
     case BTN_DECK_PREV:
         printf("Tape jump to start\n");
