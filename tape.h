@@ -13,6 +13,7 @@ typedef struct {
     // saved to file
     unsigned short num;
     uint8_t *audio_data;
+    // these should all be multiples of BUFFER_SIZE away from the start!
     uint8_t *pt_head, *pt_start, *pt_end, *pt_in, *pt_out;
     uint8_t *marks[NUM_MARKS];
 
@@ -23,6 +24,8 @@ typedef struct {
     float volume;
 
     bool jog_flag;
+
+    unsigned short buttons_start; // start of MIDI notes for this tape
 } Tape;
 
 Tape tape_a, tape_b;

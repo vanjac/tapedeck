@@ -18,6 +18,8 @@ int main(int argc, char *argv[]) {
         return 1;
     if (tape_init(&tape_b))
         return 1;
+    tape_a.buttons_start = BTNS_DECK_A;
+    tape_b.buttons_start = BTNS_DECK_B;
 
     uint8_t audio_in_buffer[BUFFER_SIZE];
     uint8_t tape_a_out_buffer[BUFFER_SIZE];

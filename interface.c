@@ -4,19 +4,18 @@
 #include "tape.h"
 #include "main.h"
 
-void tape_button_pressed(Tape * tape, int deck_button, int button);
-void tape_control_changed(Tape * tape, int button, int value);
-void tape_interface_update(Tape * tape, int led_start);
+void tape_button_pressed(Tape * tape, int button);
+void tape_interface_update(Tape * tape);
 
 void button_pressed(int button) {
     if (button >= BTNS_DECK_A && button < BTNS_DECK_A + NUM_DECK_NOTES) {
         printf("Tape A note on %d\n", button);
-        tape_button_pressed(&tape_a, button - BTNS_DECK_A, button);
+        tape_button_pressed(&tape_a, button);
         return;
     }
     if (button >= BTNS_DECK_B && button < BTNS_DECK_B + NUM_DECK_NOTES) {
         printf("Tape B note on %d\n", button);
-        tape_button_pressed(&tape_b, button - BTNS_DECK_B, button);
+        tape_button_pressed(&tape_b, button);
         return;
     }
     printf("Other note on %d\n", button);
@@ -49,8 +48,8 @@ void control_changed(int control, int value) {
     }
 }
 
-void tape_button_pressed(Tape * tape, int deck_button, int button) {
-    switch (deck_button) {
+void tape_button_pressed(Tape * tape, int button) {
+    switch (button - tape->buttons_start) {
 // playback/recording
     case BTN_DECK_PLAY:
         printf("Tape play/pause\n");
@@ -88,11 +87,12 @@ void tape_button_pressed(Tape * tape, int deck_button, int button) {
 }
 
 void interface_update(void) {
-    tape_interface_update(&tape_a, BTNS_DECK_A);
-    tape_interface_update(&tape_b, BTNS_DECK_B);
+    tape_interface_update(&tape_a);
+    tape_interface_update(&tape_b);
 }
 
-void tape_interface_update(Tape * tape, int led_start) {
+void tape_interface_update(Tape * tape) {
+    int led_start = tape->buttons_start;
     set_led(led_start + BTN_DECK_LOOP_KP1, tape->pt_head == tape->pt_start);
     set_led(led_start + BTN_DECK_LOOP_KP2, tape->pt_head == tape->pt_in);
     set_led(led_start + BTN_DECK_LOOP_KP3, tape->pt_head == tape->pt_out);

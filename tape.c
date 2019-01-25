@@ -1,6 +1,8 @@
 #include "tape.h"
 #include <stdlib.h>
+#include <string.h>
 #include "main.h"
+#include "instinct.h"
 
 int tape_init(Tape * tape) {
     tape->audio_data = malloc(TAPE_SIZE);
@@ -38,7 +40,7 @@ int tape_playback(Tape * tape, uint8_t * out_buffer) {
 }
 
 void tape_record(Tape * tape, uint8_t * in_buffer) {
-    if (! (tape->is_playing && tape->record) )
+    if (!(tape->is_playing && tape->record))
         return;
 
     for (int i = 0; i < BUFFER_SIZE; i++)
@@ -48,7 +50,17 @@ void tape_record(Tape * tape, uint8_t * in_buffer) {
 void tape_move(Tape * tape) {
     if (tape->is_playing) {
         tape->pt_head += BUFFER_SIZE;
-        // TODO: stop before end
+        if (tape->pt_head >= tape->pt_end) {
+            if (tape->record) {
+                // extend tape. will be recorded to so no need to erase
+                tape->pt_end = tape->pt_head + BUFFER_SIZE;
+            } else {
+                tape->pt_head = tape->pt_end;
+                tape->is_playing = false;
+                set_led(tape->buttons_start + BTN_DECK_PLAY, false);
+            }
+        }
+        // TODO: stop at end of audio data
         // TODO: out point action
     }
 
