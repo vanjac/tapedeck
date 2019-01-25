@@ -1,5 +1,6 @@
 #include "instinct.h"
 #include <stdio.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -11,9 +12,40 @@ int midi_fd;
 void interpret_midi_message(unsigned char b1, unsigned char b2, unsigned char b3);
 
 int instinct_open(void) {
-    midi_fd = open(MIDI_DEVICE, O_RDWR | O_NONBLOCK);
+    DIR *midi_dir = opendir(MIDI_DEVICE_DIR);
+    if (midi_dir == NULL) {
+        fprintf(stderr, "Couldn't open midi device directory %s\n", MIDI_DEVICE_DIR);
+        return 1;
+    }
+
+    struct dirent *midi_dir_entry;
+    char * midi_device_name = NULL;
+    while ((midi_dir_entry = readdir(midi_dir)) != NULL) {
+        char * name = midi_dir_entry->d_name;
+
+        int match = 1;
+        for (int i = 0; i < MIDI_DEVICE_PRE_LEN; i++) {
+            if (name[i] != MIDI_DEVICE_PRE[i]) {
+                match = 0;
+                break;
+            }
+        }
+        if (match) {
+            midi_device_name = name;
+        }
+    }
+    if (midi_device_name == NULL) {
+        fprintf(stderr, "Couldn't find a midi device\n");
+        return 1;
+    }
+
+    char midi_device_path[MIDI_DEVICE_PATH_MAX];
+    sprintf(midi_device_path, "%s%s", MIDI_DEVICE_DIR, midi_device_name);
+    printf("Found a midi device %s\n", midi_device_path);
+
+    midi_fd = open(midi_device_path, O_RDWR | O_NONBLOCK);
     if (midi_fd == -1) {
-        fprintf(stderr, "Couldn't open midi device %s\n", MIDI_DEVICE);
+        fprintf(stderr, "Couldn't open midi device\n");
         return 1;
     }
     return 0;

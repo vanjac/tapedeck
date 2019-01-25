@@ -1,7 +1,10 @@
 #include <stdbool.h>
 
 // https://www.alsa-project.org/main/index.php/ALSA_Library_API
-#define MIDI_DEVICE "/dev/snd/midiC0D0"
+#define MIDI_DEVICE_DIR "/dev/snd/"
+#define MIDI_DEVICE_PRE "midi"
+#define MIDI_DEVICE_PRE_LEN 4
+#define MIDI_DEVICE_PATH_MAX 64 // usually just 17 characters
 
 /* BUTTONS */
 // (also for LED outputs)
