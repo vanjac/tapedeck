@@ -32,18 +32,18 @@ int main(int argc, char *argv[]) {
 
         if (audio_read(audio_in_buffer))
             break;
-        tape_playback(&tape_a, tape_a_out_buffer);
-        tape_playback(&tape_b, tape_b_out_buffer);
+        int a_play = tape_playback(&tape_a, tape_a_out_buffer);
+        int b_play = tape_playback(&tape_b, tape_b_out_buffer);
 
         // mix recording
         mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer,
-            mix_buffer, tape_a.loopback, tape_b.loopback, true);
+            mix_buffer, a_play && tape_a.loopback, b_play && tape_b.loopback, true);
         tape_record(&tape_a, mix_buffer);
         tape_record(&tape_b, mix_buffer);
 
         // mix playback
         mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer,
-            mix_buffer, true, true, true);
+            mix_buffer, a_play, b_play, true);
 
         if (audio_write(mix_buffer))
             break;

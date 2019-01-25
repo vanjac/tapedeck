@@ -29,7 +29,8 @@ Tape tape_a, tape_b;
 
 int tape_init(Tape * tape);
 void tape_destroy(Tape * tape);
-void tape_playback(Tape * tape, uint8_t * out_buffer);
+// return false if tape isn't playing and nothing was written to out_buffer
+int tape_playback(Tape * tape, uint8_t * out_buffer);
 void tape_record(Tape * tape, uint8_t * in_buffer);
 void tape_move(Tape * tape);
 

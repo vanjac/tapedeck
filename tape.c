@@ -20,16 +20,15 @@ void tape_destroy(Tape * tape) {
     free(tape->audio_data);
 }
 
-void tape_playback(Tape * tape, uint8_t * out_buffer) {
+int tape_playback(Tape * tape, uint8_t * out_buffer) {
     if (!(tape->is_playing || tape->jog_flag)) {
-        for (int i = 0; i < BUFFER_SIZE; i++)
-            out_buffer[i] = 0;
-        return;
+        return 0;
     }
 
     // TODO: volume
     for (int i = 0; i < BUFFER_SIZE; i++)
         out_buffer[i] = *(tape->pt_head + i);
+    return 1;
 }
 
 void tape_record(Tape * tape, uint8_t * in_buffer) {
