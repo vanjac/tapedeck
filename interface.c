@@ -6,6 +6,7 @@
 
 void tape_button_pressed(Tape * tape, int deck_button, int button);
 void tape_control_changed(Tape * tape, int button, int value);
+void tape_interface_update(Tape * tape, int led_start);
 
 void button_pressed(int button) {
     if (button >= BTNS_DECK_A && button < BTNS_DECK_A + NUM_DECK_NOTES) {
@@ -47,6 +48,7 @@ void control_changed(int control, int value) {
 
 void tape_button_pressed(Tape * tape, int deck_button, int button) {
     switch (deck_button) {
+// playback/recording
     case BTN_DECK_PLAY:
         printf("Tape play/pause\n");
         tape->is_playing = !tape->is_playing;
@@ -62,14 +64,36 @@ void tape_button_pressed(Tape * tape, int deck_button, int button) {
         tape->loopback = !tape->loopback;
         set_led(button, tape->loopback);
         break;
+// navigation
     case BTN_DECK_PREV:
         printf("Tape jump to start\n");
-        tape->pt_head = tape->audio_data;
+        tape->pt_head = tape->pt_start;
+        break;
+    case BTN_DECK_NEXT:
+        printf("Tape jump to end\n");
+        tape->pt_head = tape->pt_end;
+        break;
+    case BTN_DECK_PBM:
+        printf("Tape set in point\n");
+        tape->pt_in = tape->pt_head;
+        break;
+    case BTN_DECK_PBP:
+        printf("Tape set out point\n");
+        tape->pt_out = tape->pt_head;
         break;
     }
 }
 
 int interface_update(void) {
+    tape_interface_update(&tape_a, BTNS_DECK_A);
+    tape_interface_update(&tape_b, BTNS_DECK_B);
     return 0;
+}
+
+void tape_interface_update(Tape * tape, int led_start) {
+    set_led(led_start + BTN_DECK_LOOP_KP1, tape->pt_head == tape->pt_start);
+    set_led(led_start + BTN_DECK_LOOP_KP2, tape->pt_head == tape->pt_in);
+    set_led(led_start + BTN_DECK_LOOP_KP3, tape->pt_head == tape->pt_out);
+    set_led(led_start + BTN_DECK_LOOP_KP4, tape->pt_head == tape->pt_end);
 }
 
