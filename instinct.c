@@ -7,9 +7,12 @@
 #include <time.h>
 #include "interface.h"
 
+#define MIDI_MESSAGE_SIZE 3
+
 int midi_fd;
 
 void interpret_midi_message(unsigned char b1, unsigned char b2, unsigned char b3);
+void all_leds_off(void);
 
 int instinct_open(void) {
     DIR *midi_dir = opendir(MIDI_DEVICE_DIR);
@@ -48,19 +51,22 @@ int instinct_open(void) {
         fprintf(stderr, "Couldn't open midi device\n");
         return 1;
     }
+
+    all_leds_off();
     return 0;
 }
 
 void instinct_close(void) {
+    all_leds_off();
     close(midi_fd);
 }
 
 int instinct_update(void) {
-    unsigned char midi_message[3];
+    unsigned char midi_message[MIDI_MESSAGE_SIZE];
     ssize_t midi_bytes_read;
 
     while(1) {
-        midi_bytes_read = read(midi_fd, &midi_message, sizeof(midi_message));
+        midi_bytes_read = read(midi_fd, &midi_message, MIDI_MESSAGE_SIZE);
         if (midi_bytes_read < 0) { // read error
             if (errno == EWOULDBLOCK)
                 break; // nothing to read
@@ -91,9 +97,17 @@ void interpret_midi_message(unsigned char b1, unsigned char b2, unsigned char b3
 }
 
 void set_led(int led, bool state) {
-    unsigned char midi_message[3];
+    unsigned char midi_message[MIDI_MESSAGE_SIZE];
     midi_message[0] = 144; // note event
     midi_message[1] = led;
     midi_message[2] = state ? 127 : 0;
-    write(midi_fd, &midi_message, sizeof(midi_message));
+    write(midi_fd, &midi_message, MIDI_MESSAGE_SIZE);
 }
+
+void all_leds_off(void) {
+    for (int i = 1; i < NUM_BUTTONS; i++) {
+        set_led(i, false);
+        sleep(0.01);
+    }
+}
+
