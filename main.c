@@ -24,11 +24,10 @@ int main(int argc, char *argv[]) {
     uint8_t tape_b_out_buffer[BUFFER_SIZE];
     uint8_t mix_buffer[BUFFER_SIZE];
 
-    while(1) {
+    while(!quit_flag) {
         if (instinct_update())
             break;
-        if (interface_update())
-            break;
+        interface_update();
 
         if (audio_read(audio_in_buffer))
             break;

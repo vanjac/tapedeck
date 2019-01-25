@@ -26,6 +26,9 @@ void button_pressed(int button) {
         link_tapes = !link_tapes;
         set_led(button, link_tapes);
         break;
+    case BTN_DOWN:
+        quit_flag = true;
+        break;
     }
 }
 
@@ -84,10 +87,9 @@ void tape_button_pressed(Tape * tape, int deck_button, int button) {
     }
 }
 
-int interface_update(void) {
+void interface_update(void) {
     tape_interface_update(&tape_a, BTNS_DECK_A);
     tape_interface_update(&tape_b, BTNS_DECK_B);
-    return 0;
 }
 
 void tape_interface_update(Tape * tape, int led_start) {
