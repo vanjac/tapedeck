@@ -9,7 +9,6 @@ int tape_init(Tape * tape) {
     tape->pt_head = tape->audio_data;
     tape->is_playing = false;
     tape->record = false;
-    tape->mute = false;
     tape->loopback = false;
     tape->out_point_action = OUT_CONTINUE;
     tape->volume = 1.0;
@@ -22,8 +21,6 @@ void tape_destroy(Tape * tape) {
 }
 
 void tape_playback(Tape * tape, uint8_t * out_buffer) {
-    if (tape->mute && !(tape->loopback))
-        return;
     if (!(tape->is_playing || tape->jog_flag)) {
         for (int i = 0; i < BUFFER_SIZE; i++)
             out_buffer[i] = 0;

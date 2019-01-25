@@ -21,9 +21,9 @@ void button_pressed(int button) {
     printf("Other note on %d\n", button);
     switch (button) {
     case BTN_SCRATCH:
-        printf("Audio in mute toggle\n");
-        audio_in_mute = !audio_in_mute;
-        set_led(button, audio_in_mute);
+        printf("Link toggle\n");
+        link_tapes = !link_tapes;
+        set_led(button, link_tapes);
         break;
     }
 }
@@ -57,15 +57,10 @@ void tape_button_pressed(Tape * tape, int deck_button, int button) {
         tape->record = !tape->record;
         set_led(button, tape->record);
         break;
-    case BTN_DECK_LOAD:
+    case BTN_DECK_LISTEN:
         printf("Tape loopback toggle\n");
         tape->loopback = !tape->loopback;
         set_led(button, tape->loopback);
-        break;
-    case BTN_DECK_LISTEN:
-        printf("Tape mute toggle\n");
-        tape->mute = !tape->mute;
-        set_led(button, tape->mute);
         break;
     case BTN_DECK_PREV:
         printf("Tape jump to start\n");

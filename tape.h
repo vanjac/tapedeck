@@ -18,7 +18,7 @@ typedef struct {
 
     // state (not saved)
     bool is_playing;
-    bool record, mute, loopback;
+    bool record, loopback;
     OutPointAction out_point_action;
     float volume;
 

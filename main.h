@@ -4,6 +4,5 @@
 #define SAMPLE_BYTES 4
 
 float audio_in_volume;
-bool audio_in_mute;
 bool link_tapes;
 

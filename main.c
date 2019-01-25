@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 
         // mix playback
         mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer,
-            mix_buffer, !(tape_a.mute), !(tape_b.mute), true);
+            mix_buffer, true, true, true);
 
         if (audio_write(mix_buffer))
             break;
