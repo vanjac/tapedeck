@@ -22,7 +22,7 @@ typedef struct {
     OutPointAction out_point_action;
     float volume;
 
-    bool jog_flag;
+    unsigned char jog_flag; // number of times jog sample should be played
 
     unsigned short buttons_start; // start of MIDI notes for this tape
 } Tape;

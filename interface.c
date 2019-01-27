@@ -171,7 +171,7 @@ int check_button_held(int button, unsigned int tmillis) {
 void tape_jog(Tape * tape, int value) {
     if (value >= 64)
         value -= 128;
-    tape->jog_flag = true;
+    tape->jog_flag = JOG_REPEAT_COUNT;
     tape->pt_head += value * BUFFER_SIZE;
     if (tape->record) {
         if (tape_expand(tape))
