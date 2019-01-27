@@ -46,11 +46,21 @@ void control_changed(int control, int value) {
         break;
     case CTL_JOG_DA:
     case CTL_JOG_PRESSED_DA:
-        tape_jog(&tape_a, value);
+        if (link_tapes) {
+            tape_jog(&tape_a, value);
+            tape_jog(&tape_b, value);
+        } else {
+            tape_jog(&tape_a, value);
+        }
         break;
     case CTL_JOG_DB:
     case CTL_JOG_PRESSED_DB:
-        tape_jog(&tape_b, value);
+        if (link_tapes) {
+            tape_jog(&tape_a, value);
+            tape_jog(&tape_b, value);
+        } else {
+            tape_jog(&tape_b, value);
+        }
         break;
     }
 }
@@ -60,6 +70,8 @@ void tape_button_pressed(Tape * tape, int button) {
 // playback/recording
     case BTN_DECK_PLAY:
         tape->is_playing = !tape->is_playing;
+        if (link_tapes)
+            tape_a.is_playing = tape_b.is_playing = tape->is_playing;
         break;
     case BTN_DECK_CUE:
         tape->record = !tape->record;
