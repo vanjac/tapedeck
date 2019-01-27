@@ -10,6 +10,8 @@ int check_button_held(int button, int tmillis);
 
 void tape_jog(Tape * tape, int value);
 
+float control_to_volume(int control);
+
 void button_pressed(int button) {
     if (button >= BTNS_DECK_A && button < BTNS_DECK_A + NUM_DECK_NOTES) {
         tape_button_pressed(&tape_a, button);
@@ -33,13 +35,13 @@ void button_pressed(int button) {
 void control_changed(int control, int value) {
     switch (control) {
     case CTL_VOL_DA:
-        tape_a.volume = (float)value / 127.0;
+        tape_a.volume = control_to_volume(value);
         break;
     case CTL_VOL_DB:
-        tape_b.volume = (float)value / 127.0;
+        tape_b.volume = control_to_volume(value);
         break;
     case CTL_XFADER:
-        audio_in_volume = (float)value / 127.0;
+        audio_in_volume = control_to_volume(value);
         break;
     case CTL_JOG_DA:
     case CTL_JOG_PRESSED_DA:
@@ -181,3 +183,9 @@ void tape_jog(Tape * tape, int value) {
     }
 }
 
+
+float control_to_volume(int control) {
+    float linear = (float)control / 127.0;
+    // https://www.dr-lex.be/info-stuff/volumecontrols.html
+    return linear * linear * linear * linear;
+}
