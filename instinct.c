@@ -12,6 +12,7 @@
 int midi_fd;
 
 void interpret_midi_message(unsigned char b1, unsigned char b2, unsigned char b3);
+void force_set_led(int led, bool state);
 void all_leds_off(void);
 
 int instinct_open(void) {
@@ -97,11 +98,17 @@ void interpret_midi_message(unsigned char b1, unsigned char b2, unsigned char b3
 }
 
 void set_led(int led, bool state) {
+    if (led_states[led] != state)
+        force_set_led(led, state);
+}
+
+void force_set_led(int led, bool state) {
     unsigned char midi_message[MIDI_MESSAGE_SIZE];
     midi_message[0] = 144; // note event
     midi_message[1] = led;
     midi_message[2] = state ? 127 : 0;
     write(midi_fd, &midi_message, MIDI_MESSAGE_SIZE);
+    led_states[led] = state;
 }
 
 void all_leds_off(void) {

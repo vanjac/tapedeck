@@ -77,6 +77,8 @@ long button_presses[NUM_BUTTONS];
 
 long control_values[NUM_CONTROLS];
 
+bool led_states[NUM_BUTTONS];
+
 int instinct_open(void);
 void instinct_close(void);
 int instinct_update(void);
