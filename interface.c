@@ -7,6 +7,8 @@
 void tape_button_pressed(Tape * tape, int button);
 void tape_interface_update(Tape * tape);
 
+void tape_jog(Tape * tape, int value);
+
 void button_pressed(int button) {
     if (button >= BTNS_DECK_A && button < BTNS_DECK_A + NUM_DECK_NOTES) {
         tape_button_pressed(&tape_a, button);
@@ -38,6 +40,15 @@ void control_changed(int control, int value) {
         break;
     case CTL_XFADER:
         audio_in_volume = (float)value / 127.0;
+        break;
+    case CTL_JOG_DA:
+    case CTL_JOG_PRESSED_DA:
+        tape_jog(&tape_a, value);
+        break;
+    case CTL_JOG_DB:
+    case CTL_JOG_PRESSED_DB:
+        tape_jog(&tape_b, value);
+        break;
     }
 }
 
@@ -86,5 +97,16 @@ void tape_interface_update(Tape * tape) {
     set_led(led_start + BTN_DECK_LOOP_KP2, tape->pt_head == tape->pt_in);
     set_led(led_start + BTN_DECK_LOOP_KP3, tape->pt_head == tape->pt_out);
     set_led(led_start + BTN_DECK_LOOP_KP4, tape->pt_head == tape->pt_end);
+}
+
+void tape_jog(Tape * tape, int value) {
+    if (value >= 64)
+        value -= 128;
+    tape->jog_flag = true;
+    tape->pt_head += value * BUFFER_SIZE;
+    if (tape->pt_head <= tape->pt_start)
+        tape->pt_head = tape->pt_start;
+    if (tape->pt_head >= tape->pt_end)
+        tape->pt_head = tape->pt_end;
 }
 
