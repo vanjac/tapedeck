@@ -42,9 +42,14 @@ void tape_record(Tape * tape, uint8_t * in_buffer) {
     if (!(tape->is_playing && tape->record))
         return;
     if (tape->pt_head >= tape->pt_end) {
-        // extend tape. will be recorded to so no need to erase
-        tape->pt_end = tape->pt_head + BUFFER_SIZE;
-        // TODO: stop at end of audio data
+        if (tape->pt_head > TAPE_MAX(tape)) {
+            tape->pt_head = TAPE_MAX(tape);
+            tape->is_playing = false;
+            beep();
+        } else {
+            // extend tape. will be recorded to so no need to erase
+            tape->pt_end = tape->pt_head + BUFFER_SIZE;
+        }
     }
     for (int i = 0; i < BUFFER_SIZE; i++)
         *(tape->pt_head + i) = in_buffer[i];
