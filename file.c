@@ -58,8 +58,13 @@ int read_file(FILE * file, Tape * tape) {
         if (!strcmp(chunk_id, "fmt "))
             read_chunk_fmt(file);
         else if (!strcmp(chunk_id, "data")) {
-            fread(tape->pt_head, 1, chunk_size, file);
-            tape->pt_end = tape->pt_start + chunk_size;
+            unsigned int read_size = chunk_size;
+            if (read_size > TAPE_MAX(tape) - tape->pt_start) {
+                fprintf(stderr, "File is too large!\n");
+                read_size = TAPE_MAX(tape) - tape->pt_start;
+            }
+            fread(tape->pt_start, 1, read_size, file);
+            tape->pt_end = tape->pt_start + read_size;
         }
 
         pos += 8 + chunk_size;
