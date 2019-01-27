@@ -1,12 +1,13 @@
 #include "interface.h"
+#include <stdio.h>
 #include <time.h>
 #include "instinct.h"
 #include "tape.h"
 #include "main.h"
 
 void tape_button_pressed(Tape * tape, int button);
-void tape_interface_update(Tape * tape, int tmillis, bool blink);
-int check_button_held(int button, int tmillis);
+void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink);
+int check_button_held(int button, unsigned int tmillis);
 
 void tape_jog(Tape * tape, int value);
 
@@ -106,7 +107,7 @@ void tape_button_pressed(Tape * tape, int button) {
 }
 
 void interface_update(void) {
-    int tmillis = time_millis();
+    unsigned int tmillis = time_millis();
     bool blink = tmillis % (BLINK_RATE * 2) >= BLINK_RATE;
 
     tape_interface_update(&tape_a, tmillis, blink);
@@ -115,7 +116,7 @@ void interface_update(void) {
     set_led(BTN_SCRATCH, link_tapes);
 }
 
-void tape_interface_update(Tape * tape, int tmillis, bool blink) {
+void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink) {
     int btn_start = tape->buttons_start;
 
     if (check_button_held(btn_start + BTN_DECK_PBM, tmillis)) {
@@ -159,7 +160,7 @@ void tape_interface_update(Tape * tape, int tmillis, bool blink) {
     set_led(btn_start + BTN_DECK_LOOP_KP4, tape->pt_head == tape->pt_end);
 }
 
-int check_button_held(int button, int tmillis) {
+int check_button_held(int button, unsigned int tmillis) {
     if (button_presses[button] && tmillis - button_presses[button] > HOLD_TIME) {
         button_presses[button] = 0;
         return 1;

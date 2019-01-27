@@ -73,7 +73,7 @@
 
 // 0 for not currently pressed
 // nonzero for time button was pressed
-int button_presses[NUM_BUTTONS];
+unsigned int button_presses[NUM_BUTTONS];
 
 bool led_states[NUM_BUTTONS];
 

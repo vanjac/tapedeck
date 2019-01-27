@@ -10,5 +10,5 @@ bool link_tapes;
 int beep_time;
 
 void beep(void);
-int time_millis(void);
+unsigned int time_millis(void);
 

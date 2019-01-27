@@ -106,7 +106,7 @@ void mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
     }
 }
 
-int time_millis(void) {
+unsigned int time_millis(void) {
     struct timeval time;
     gettimeofday(&time, NULL);
     return time.tv_sec * 1000 + time.tv_usec / 1000;
