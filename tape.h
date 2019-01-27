@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <pulse/simple.h>
+#include "main.h"
 
 // 6 minutes 20 seconds of audio
 // with sample rate of 44100 Hz, 16 bit samples, 2 channels
@@ -29,6 +30,7 @@ typedef struct {
 Tape tape_a, tape_b;
 
 int tape_init(Tape * tape);
+void tape_reset(Tape * tape);
 void tape_destroy(Tape * tape);
 // return false if tape isn't playing and nothing was written to out_buffer
 int tape_playback(Tape * tape, uint8_t * out_buffer);

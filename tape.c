@@ -8,6 +8,11 @@ int tape_init(Tape * tape) {
     if (!(tape->audio_data))
         return 1;
 
+    tape_reset(tape);
+    return 0;
+}
+
+void tape_reset(Tape * tape) {
     tape->pt_start = tape->audio_data + (TAPE_SIZE / 4);
     tape->pt_end = tape->pt_start;
     tape->pt_in = tape->pt_start;
@@ -20,7 +25,6 @@ int tape_init(Tape * tape) {
     tape->out_point_action = OUT_CONTINUE;
     tape->volume = 1.0;
     tape->jog_flag = false;
-    return 0;
 }
 
 void tape_destroy(Tape * tape) {
