@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "main.h"
-#include "instinct.h"
 
 int tape_init(Tape * tape) {
     tape->audio_data = malloc(TAPE_SIZE);
@@ -58,7 +57,6 @@ void tape_move(Tape * tape) {
         if ((tape->pt_head >= tape->pt_end) && !(tape->record)) {
             tape->pt_head = tape->pt_end;
             tape->is_playing = false;
-            set_led(tape->buttons_start + BTN_DECK_PLAY, false);
         }
         // TODO: out point action
     }

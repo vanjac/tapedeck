@@ -23,7 +23,6 @@ void button_pressed(int button) {
     case BTN_SCRATCH:
         printf("Link toggle\n");
         link_tapes = !link_tapes;
-        set_led(button, link_tapes);
         break;
     case BTN_DOWN:
         quit_flag = true;
@@ -54,17 +53,14 @@ void tape_button_pressed(Tape * tape, int button) {
     case BTN_DECK_PLAY:
         printf("Tape play/pause\n");
         tape->is_playing = !tape->is_playing;
-        set_led(button, tape->is_playing);
         break;
     case BTN_DECK_CUE:
         printf("Tape record toggle\n");
         tape->record = !tape->record;
-        set_led(button, tape->record);
         break;
     case BTN_DECK_LISTEN:
         printf("Tape loopback toggle\n");
         tape->loopback = !tape->loopback;
-        set_led(button, tape->loopback);
         break;
 // navigation
     case BTN_DECK_PREV:
@@ -89,10 +85,16 @@ void tape_button_pressed(Tape * tape, int button) {
 void interface_update(void) {
     tape_interface_update(&tape_a);
     tape_interface_update(&tape_b);
+
+    set_led(BTN_SCRATCH, link_tapes);
 }
 
 void tape_interface_update(Tape * tape) {
     int led_start = tape->buttons_start;
+    set_led(led_start + BTN_DECK_PLAY, tape->is_playing);
+    set_led(led_start + BTN_DECK_CUE, tape->record);
+    set_led(led_start + BTN_DECK_LISTEN, tape->loopback);
+
     set_led(led_start + BTN_DECK_LOOP_KP1, tape->pt_head == tape->pt_start);
     set_led(led_start + BTN_DECK_LOOP_KP2, tape->pt_head == tape->pt_in);
     set_led(led_start + BTN_DECK_LOOP_KP3, tape->pt_head == tape->pt_out);
