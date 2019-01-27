@@ -64,3 +64,24 @@ void tape_move(Tape * tape) {
     tape->jog_flag = false;
 }
 
+int tape_expand(Tape * tape) {
+    int ret = 0;
+    if (tape->pt_head < tape->audio_data) {
+        tape->pt_head = tape->audio_data;
+        ret = 1;
+    } else if (tape->pt_head > TAPE_MAX(tape)) {
+        tape->pt_head = TAPE_MAX(tape);
+        ret = 1;
+    }
+
+    if (tape->pt_head < tape->pt_start) {
+        memset(tape->pt_head, 0, tape->pt_start - tape->pt_head);
+        tape->pt_start = tape->pt_head;
+    } else if (tape->pt_head > tape->pt_end) {
+        memset(tape->pt_end, 0, tape->pt_head - tape->pt_end);
+        tape->pt_end = tape->pt_head;
+    }
+
+    return ret;
+}
+

@@ -114,9 +114,14 @@ void tape_jog(Tape * tape, int value) {
         value -= 128;
     tape->jog_flag = true;
     tape->pt_head += value * BUFFER_SIZE;
-    if (tape->pt_head <= tape->pt_start)
-        tape->pt_head = tape->pt_start;
-    if (tape->pt_head >= tape->pt_end)
-        tape->pt_head = tape->pt_end;
+    if (tape->record) {
+        if (tape_expand(tape))
+            beep();
+    } else {
+        if (tape->pt_head <= tape->pt_start)
+            tape->pt_head = tape->pt_start;
+        else if (tape->pt_head >= tape->pt_end)
+            tape->pt_head = tape->pt_end;
+    }
 }
 

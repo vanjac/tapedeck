@@ -4,8 +4,7 @@
 // 6 minutes 20 seconds of audio
 // with sample rate of 44100 Hz, 16 bit samples, 2 channels
 #define TAPE_SIZE 67108864
-
-#define NUM_MARKS 4
+#define TAPE_MAX(tape) tape->audio_data + TAPE_SIZE - BUFFER_SIZE
 
 typedef enum {OUT_CONTINUE, OUT_STOP, OUT_LOOP} OutPointAction;
 
@@ -15,7 +14,6 @@ typedef struct {
     uint8_t *audio_data;
     // these should all be multiples of BUFFER_SIZE away from the start!
     uint8_t *pt_head, *pt_start, *pt_end, *pt_in, *pt_out;
-    uint8_t *marks[NUM_MARKS];
 
     // state (not saved)
     bool is_playing;
@@ -36,4 +34,6 @@ void tape_destroy(Tape * tape);
 int tape_playback(Tape * tape, uint8_t * out_buffer);
 void tape_record(Tape * tape, uint8_t * in_buffer);
 void tape_move(Tape * tape);
-
+// resize tape in/out points to include pt_head
+// return false if tape couldn't expand past audio memory
+int tape_expand(Tape * tape);
