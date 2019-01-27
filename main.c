@@ -8,6 +8,7 @@
 void mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
          bool enable1, bool enable2, bool enable3);
 void mix_sample(uint8_t * in, int * out);
+void beep_sample(uint8_t * out);
 
 int main(int argc, char *argv[]) {
     if (instinct_open())
@@ -42,9 +43,12 @@ int main(int argc, char *argv[]) {
         tape_record(&tape_a, mix_buffer);
         tape_record(&tape_b, mix_buffer);
 
-        // mix playback
-        mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer,
-            mix_buffer, a_play, b_play, true);
+        if (beep_time >= 0)
+            beep_sample(mix_buffer);
+        else
+            // mix playback
+            mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer,
+                mix_buffer, a_play, b_play, true);
 
         if (audio_write(mix_buffer))
             break;
@@ -87,4 +91,20 @@ void mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
 void mix_sample(uint8_t * in, int * out) {
     short in_value = *(in + 1) << 8 | *in; // little endian
     *out += in_value;
+}
+
+void beep(void) {
+    beep_time = 0;
+}
+
+void beep_sample(uint8_t * out) {
+    for (int i = 0; i < BUFFER_SIZE; i += 4) {
+        short sample = beep_time * 1486; // should be about 1000 Hz
+        sample /= 6;
+        out[i + 1] = out[i + 3] = (sample >> 8) & 0xFF;
+        out[i + 0] = out[i + 2] = sample & 0xFF;
+        beep_time++;
+    }
+    if (beep_time >= 4096)
+        beep_time = -1;
 }
