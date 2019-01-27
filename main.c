@@ -1,12 +1,15 @@
 #include "main.h"
 #include <stdio.h>
+#include <math.h>
 #include <sys/time.h>
-#include "tape.h"
+#include "file.h"
 #include "instinct.h"
 #include "audio.h"
 #include "interface.h"
+#include "display.h"
 
-void mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
+// return peak
+float mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
          bool enable1, bool enable2, bool enable3,
          float vol1, float vol2, float vol3);
 void beep_sample(uint8_t * out);
@@ -19,6 +22,8 @@ void write_sample(uint8_t * ptr, short sample);
 int main(int argc, char *argv[]) {
     if (instinct_open())
         return 1;
+    if (display_open())
+        return 1;
     if (audio_open())
         return 1;
     if (tape_init(&tape_a))
@@ -27,6 +32,9 @@ int main(int argc, char *argv[]) {
         return 1;
     tape_a.buttons_start = BTNS_DECK_A;
     tape_b.buttons_start = BTNS_DECK_B;
+
+    load_tape("a.wav", &tape_a);
+    load_tape("b.wav", &tape_b);
 
     audio_in_volume = 1.0;
 
@@ -52,23 +60,32 @@ int main(int argc, char *argv[]) {
         tape_record(&tape_a, mix_buffer);
         tape_record(&tape_b, mix_buffer);
 
+
+        // mix playback
+        float peak = mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer, mix_buffer,
+            a_play, b_play, true,
+            tape_a.volume, tape_b.volume, audio_in_volume);
         if (beep_time >= 0)
             beep_sample(mix_buffer);
-        else
-            // mix playback
-            mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer, mix_buffer,
-                a_play, b_play, true,
-                tape_a.volume, tape_b.volume, audio_in_volume);
+
+        draw_level(exponential_volume_to_linear(peak));
 
         if (audio_write(mix_buffer))
             break;
 
         tape_move(&tape_a);
         tape_move(&tape_b);
+
+        display_update();
     }
 
     printf("Quit\n");
+
+    save_tape("a.wav", &tape_a);
+    save_tape("b.wav", &tape_b);
+
     instinct_close();
+    display_close();
     audio_close();
     tape_destroy(&tape_a);
     tape_destroy(&tape_b);
@@ -87,9 +104,10 @@ void write_sample(uint8_t * ptr, short sample) {
 
 // depends on sample format being PA_SAMPLE_S16LE
 // Signed 16 bit, little endian
-void mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
+float mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
          bool enable1, bool enable2, bool enable3,
          float vol1, float vol2, float vol3) {
+    int peak = 0;
     for (int i = 0; i < BUFFER_SIZE; i += 2) {
         int mixed = 0;
         if (enable1)
@@ -102,14 +120,28 @@ void mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
             mixed = 32767;
         else if (mixed < -32768)
             mixed = -32768;
+        if (mixed > peak)
+            peak = mixed;
+        else if (-mixed > peak)
+            peak = -mixed;
         write_sample(out + i, mixed);
     }
+    return peak / 32768.0;
 }
 
 unsigned int time_millis(void) {
     struct timeval time;
     gettimeofday(&time, NULL);
     return time.tv_sec * 1000 + time.tv_usec / 1000;
+}
+
+float linear_volume_to_exponential(float linear) {
+    // https://www.dr-lex.be/info-stuff/volumecontrols.html
+    return linear * linear * linear * linear;
+}
+
+float exponential_volume_to_linear(float exponential) {
+    return pow(exponential, 0.25);
 }
 
 void beep(void) {

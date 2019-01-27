@@ -4,6 +4,7 @@
 #include "instinct.h"
 #include "tape.h"
 #include "main.h"
+#include "display.h"
 
 void tape_button_pressed(Tape * tape, int button);
 void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink);
@@ -198,7 +199,14 @@ void tape_jog(Tape * tape, int value) {
 
 
 float control_to_volume(int control) {
-    float linear = (float)control / 127.0;
-    // https://www.dr-lex.be/info-stuff/volumecontrols.html
-    return linear * linear * linear * linear;
+    return linear_volume_to_exponential((float)control / 127.0);
+}
+
+void draw_level(float level) {
+    for (int i = 0; i < DISPLAY_LENGTH; i++) {
+        if (i < level * DISPLAY_LENGTH)
+            set_pixel(i + DISPLAY_LENGTH, COLOR_RED);
+        else
+            set_pixel(i + DISPLAY_LENGTH, COLOR_BLACK);
+    }
 }
