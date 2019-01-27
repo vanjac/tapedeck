@@ -35,6 +35,10 @@ int tape_playback(Tape * tape, uint8_t * out_buffer) {
     if (!(tape->is_playing || tape->jog_flag)) {
         return 0;
     }
+    if (tape->pt_head >= tape->pt_end) {
+        // could happen while recording and expanding tape
+        return 0;
+    }
 
     for (int i = 0; i < BUFFER_SIZE; i++)
         out_buffer[i] = *(tape->pt_head + i);
