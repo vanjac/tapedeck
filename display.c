@@ -1,7 +1,7 @@
 #include "display.h"
 #include <ncurses.h>
 
-void force_set_pixel(int num, unsigned char value);
+void force_set_pixel(int num, bool value);
 void all_pixels_off(void);
 
 int display_open(void) {
@@ -20,35 +20,21 @@ void display_update(void) {
     refresh();
 }
 
-void set_pixel(int num, unsigned char value) {
+void set_pixel(int num, bool value) {
     if (display_pixels[num] != value)
         force_set_pixel(num, value);
 }
 
-void force_set_pixel(int num, unsigned char value) {
+void force_set_pixel(int num, bool value) {
     display_pixels[num] = value;
 
-    char c;
-    switch (value) {
-    case COLOR_BLACK:
-        c = '.';
-        break;
-    case COLOR_RED:
-        c = '-';
-        break;
-    case COLOR_GREEN:
-        c = '|';
-        break;
-    case COLOR_YELLOW:
-        c = '+';
-        break;
-    }
-    int row = num / DISPLAY_LENGTH;
-    int col = num % DISPLAY_LENGTH;
+    char c = value ? '#' : '.';
+    int row = num / (DISPLAY_LENGTH * 2);
+    int col = num % (DISPLAY_LENGTH * 2);
     mvprintw(row, col, "%c", c);
 }
 
 void all_pixels_off(void) {
     for (int i = 0; i < DISPLAY_LENGTH * DISPLAY_ROWS; i++)
-        force_set_pixel(i, COLOR_BLACK);
+        force_set_pixel(i, false);
 }

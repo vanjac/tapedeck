@@ -7,13 +7,13 @@
 #include "display.h"
 
 void tape_button_pressed(Tape * tape, int button);
-void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink,
-    int pixel_start);
+void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink);
+void tape_display_update(Tape * tape, int pixel_start, bool blink);
 int check_button_held(int button, unsigned int tmillis);
 
 void tape_jog(Tape * tape, int value);
 
-int draw_point(uint8_t * position, uint8_t * cur_pos, uint8_t * next_pos);
+int draw_graph(int pixel_start, int length, float value);
 float control_to_volume(int control);
 
 void button_pressed(int button) {
@@ -125,14 +125,15 @@ void interface_update(void) {
     unsigned int tmillis = time_millis();
     bool blink = tmillis % (BLINK_RATE * 2) >= BLINK_RATE;
 
-    tape_interface_update(&tape_a, tmillis, blink, 0);
-    tape_interface_update(&tape_b, tmillis, blink, DISPLAY_LENGTH / 2);
+    tape_interface_update(&tape_a, tmillis, blink);
+    tape_interface_update(&tape_b, tmillis, blink);
+    tape_display_update(&tape_a, 0, blink);
+    tape_display_update(&tape_b, DISPLAY_LENGTH * 2, blink);
 
     set_led(BTN_SCRATCH, link_tapes);
 }
 
-void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink,
-        int pixel_start) {
+void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink) {
     int btn_start = tape->buttons_start;
 
     if (check_button_held(btn_start + BTN_DECK_PBM, tmillis)) {
@@ -174,23 +175,27 @@ void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink,
     set_led(btn_start + BTN_DECK_LOOP_KP2, tape->pt_head == tape->pt_in);
     set_led(btn_start + BTN_DECK_LOOP_KP3, tape->pt_head == tape->pt_out);
     set_led(btn_start + BTN_DECK_LOOP_KP4, tape->pt_head == tape->pt_end);
+}
 
-    // draw tape
-    long tape_len = tape->pt_end - tape->pt_start;
-    long pixel_len = DISPLAY_LENGTH / 2 - 1;
-    for (long i = 0; i < pixel_len + 1; i++) {
-        uint8_t * cur_pos = tape_len * i / pixel_len + tape->pt_start;
-        uint8_t * next_pos = tape_len * (i + 1) / pixel_len + tape->pt_start;
+void tape_display_update(Tape * tape, int pixel_start, bool blink) {
+    uint8_t * head = tape->pt_head;
+    uint8_t * start = tape->pt_start;
+    uint8_t * end = tape->pt_end;
+    uint8_t * in = tape->pt_in;
+    uint8_t * out = tape->pt_out;
 
-        unsigned char color = COLOR_BLACK;
-        if (draw_point(tape->pt_start, cur_pos, next_pos)
-            || draw_point(tape->pt_in, cur_pos, next_pos)
-            || draw_point(tape->pt_out, cur_pos, next_pos)
-            || draw_point(tape->pt_end, cur_pos, next_pos))
-            color |= COLOR_RED;
-        if (draw_point(tape->pt_head, cur_pos, next_pos))
-            color |= COLOR_GREEN;
-        set_pixel(i + pixel_start, color);
+    draw_graph(pixel_start, DISPLAY_LENGTH - 1,
+        (float)(head - start) / (end - start));
+    set_pixel(pixel_start + DISPLAY_LENGTH - 1, head == end);
+
+    if (head >= in && head <= out) {
+        draw_graph(pixel_start + DISPLAY_LENGTH + 1, DISPLAY_LENGTH - 2,
+            (float)(head - in) / (out - in));
+        set_pixel(pixel_start + DISPLAY_LENGTH, true);
+        set_pixel(pixel_start + DISPLAY_LENGTH * 2 - 1, head == out);
+    } else {
+        draw_graph(pixel_start + DISPLAY_LENGTH, DISPLAY_LENGTH - 1, 0);
+        set_pixel(pixel_start + DISPLAY_LENGTH * 2 - 1, head > out);
     }
 }
 
@@ -218,20 +223,16 @@ void tape_jog(Tape * tape, int value) {
     }
 }
 
+void draw_level(float level) {
+    draw_graph(DISPLAY_LENGTH * 4, DISPLAY_LENGTH * 2, level);
+}
 
-int draw_point(uint8_t * position, uint8_t * cur_pos, uint8_t * next_pos) {
-    return position >= cur_pos && position < next_pos;
+int draw_graph(int pixel_start, int length, float value) {
+    for (int i = 0; i < length; i++)
+        set_pixel(pixel_start + i, i < value * length);
 }
 
 float control_to_volume(int control) {
     return linear_volume_to_exponential((float)control / 127.0);
 }
 
-void draw_level(float level) {
-    for (int i = 0; i < DISPLAY_LENGTH; i++) {
-        if (i < level * DISPLAY_LENGTH)
-            set_pixel(i + DISPLAY_LENGTH, COLOR_RED);
-        else
-            set_pixel(i + DISPLAY_LENGTH, COLOR_BLACK);
-    }
-}
