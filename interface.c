@@ -1,5 +1,4 @@
 #include "interface.h"
-#include <stdio.h>
 #include "instinct.h"
 #include "tape.h"
 #include "main.h"
@@ -30,7 +29,6 @@ void button_pressed(int button) {
 }
 
 void control_changed(int control, int value) {
-    printf("Control %d set to %d\n", control, value);
     switch (control) {
     case CTL_VOL_DA:
         tape_a.volume = (float)value / 127.0;
