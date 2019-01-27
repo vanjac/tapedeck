@@ -24,7 +24,7 @@ void tape_reset(Tape * tape) {
     tape->loopback = false;
     tape->out_point_action = OUT_CONTINUE;
     tape->volume = 1.0;
-    tape->jog_flag = false;
+    tape->jog_flag = 0;
 }
 
 void tape_destroy(Tape * tape) {
@@ -90,7 +90,8 @@ void tape_move(Tape * tape) {
         }
     }
 
-    tape->jog_flag = false;
+    if (tape->jog_flag)
+        tape->jog_flag--;
 }
 
 int tape_expand(Tape * tape) {
