@@ -9,19 +9,16 @@ void tape_interface_update(Tape * tape);
 
 void button_pressed(int button) {
     if (button >= BTNS_DECK_A && button < BTNS_DECK_A + NUM_DECK_NOTES) {
-        printf("Tape A note on %d\n", button);
         tape_button_pressed(&tape_a, button);
         return;
     }
     if (button >= BTNS_DECK_B && button < BTNS_DECK_B + NUM_DECK_NOTES) {
-        printf("Tape B note on %d\n", button);
         tape_button_pressed(&tape_b, button);
         return;
     }
-    printf("Other note on %d\n", button);
+
     switch (button) {
     case BTN_SCRATCH:
-        printf("Link toggle\n");
         link_tapes = !link_tapes;
         break;
     case BTN_DOWN:
@@ -34,15 +31,12 @@ void control_changed(int control, int value) {
     printf("Control %d set to %d\n", control, value);
     switch (control) {
     case CTL_VOL_DA:
-        printf("Tape A volume\n");
         tape_a.volume = (float)value / 127.0;
         break;
     case CTL_VOL_DB:
-        printf("Tape B volume\n");
         tape_b.volume = (float)value / 127.0;
         break;
     case CTL_XFADER:
-        printf("Audio in volume\n");
         audio_in_volume = (float)value / 127.0;
     }
 }
@@ -51,32 +45,25 @@ void tape_button_pressed(Tape * tape, int button) {
     switch (button - tape->buttons_start) {
 // playback/recording
     case BTN_DECK_PLAY:
-        printf("Tape play/pause\n");
         tape->is_playing = !tape->is_playing;
         break;
     case BTN_DECK_CUE:
-        printf("Tape record toggle\n");
         tape->record = !tape->record;
         break;
     case BTN_DECK_LISTEN:
-        printf("Tape loopback toggle\n");
         tape->loopback = !tape->loopback;
         break;
 // navigation
     case BTN_DECK_PREV:
-        printf("Tape jump to start\n");
         tape->pt_head = tape->pt_start;
         break;
     case BTN_DECK_NEXT:
-        printf("Tape jump to end\n");
         tape->pt_head = tape->pt_end;
         break;
     case BTN_DECK_PBM:
-        printf("Tape set in point\n");
         tape->pt_in = tape->pt_head;
         break;
     case BTN_DECK_PBP:
-        printf("Tape set out point\n");
         tape->pt_out = tape->pt_head;
         break;
     }
