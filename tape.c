@@ -42,7 +42,11 @@ int tape_playback(Tape * tape, uint8_t * out_buffer) {
 void tape_record(Tape * tape, uint8_t * in_buffer) {
     if (!(tape->is_playing && tape->record))
         return;
-
+    if (tape->pt_head >= tape->pt_end) {
+        // extend tape. will be recorded to so no need to erase
+        tape->pt_end = tape->pt_head + BUFFER_SIZE;
+        // TODO: stop at end of audio data
+    }
     for (int i = 0; i < BUFFER_SIZE; i++)
         *(tape->pt_head + i) = in_buffer[i];
 }
@@ -50,17 +54,12 @@ void tape_record(Tape * tape, uint8_t * in_buffer) {
 void tape_move(Tape * tape) {
     if (tape->is_playing) {
         tape->pt_head += BUFFER_SIZE;
-        if (tape->pt_head >= tape->pt_end) {
-            if (tape->record) {
-                // extend tape. will be recorded to so no need to erase
-                tape->pt_end = tape->pt_head + BUFFER_SIZE;
-            } else {
-                tape->pt_head = tape->pt_end;
-                tape->is_playing = false;
-                set_led(tape->buttons_start + BTN_DECK_PLAY, false);
-            }
+
+        if ((tape->pt_head >= tape->pt_end) && !(tape->record)) {
+            tape->pt_head = tape->pt_end;
+            tape->is_playing = false;
+            set_led(tape->buttons_start + BTN_DECK_PLAY, false);
         }
-        // TODO: stop at end of audio data
         // TODO: out point action
     }
 
