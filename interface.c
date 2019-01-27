@@ -7,11 +7,13 @@
 #include "display.h"
 
 void tape_button_pressed(Tape * tape, int button);
-void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink);
+void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink,
+    int pixel_start);
 int check_button_held(int button, unsigned int tmillis);
 
 void tape_jog(Tape * tape, int value);
 
+int draw_point(uint8_t * position, uint8_t * cur_pos, uint8_t * next_pos);
 float control_to_volume(int control);
 
 void button_pressed(int button) {
@@ -123,13 +125,14 @@ void interface_update(void) {
     unsigned int tmillis = time_millis();
     bool blink = tmillis % (BLINK_RATE * 2) >= BLINK_RATE;
 
-    tape_interface_update(&tape_a, tmillis, blink);
-    tape_interface_update(&tape_b, tmillis, blink);
+    tape_interface_update(&tape_a, tmillis, blink, 0);
+    tape_interface_update(&tape_b, tmillis, blink, DISPLAY_LENGTH / 2);
 
     set_led(BTN_SCRATCH, link_tapes);
 }
 
-void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink) {
+void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink,
+        int pixel_start) {
     int btn_start = tape->buttons_start;
 
     if (check_button_held(btn_start + BTN_DECK_PBM, tmillis)) {
@@ -171,6 +174,24 @@ void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink) {
     set_led(btn_start + BTN_DECK_LOOP_KP2, tape->pt_head == tape->pt_in);
     set_led(btn_start + BTN_DECK_LOOP_KP3, tape->pt_head == tape->pt_out);
     set_led(btn_start + BTN_DECK_LOOP_KP4, tape->pt_head == tape->pt_end);
+
+    // draw tape
+    long tape_len = tape->pt_end - tape->pt_start;
+    long pixel_len = DISPLAY_LENGTH / 2 - 1;
+    for (long i = 0; i < pixel_len + 1; i++) {
+        uint8_t * cur_pos = tape_len * i / pixel_len + tape->pt_start;
+        uint8_t * next_pos = tape_len * (i + 1) / pixel_len + tape->pt_start;
+
+        unsigned char color = COLOR_BLACK;
+        if (draw_point(tape->pt_start, cur_pos, next_pos)
+            || draw_point(tape->pt_in, cur_pos, next_pos)
+            || draw_point(tape->pt_out, cur_pos, next_pos)
+            || draw_point(tape->pt_end, cur_pos, next_pos))
+            color |= COLOR_RED;
+        if (draw_point(tape->pt_head, cur_pos, next_pos))
+            color |= COLOR_GREEN;
+        set_pixel(i + pixel_start, color);
+    }
 }
 
 int check_button_held(int button, unsigned int tmillis) {
@@ -197,6 +218,10 @@ void tape_jog(Tape * tape, int value) {
     }
 }
 
+
+int draw_point(uint8_t * position, uint8_t * cur_pos, uint8_t * next_pos) {
+    return position >= cur_pos && position < next_pos;
+}
 
 float control_to_volume(int control) {
     return linear_volume_to_exponential((float)control / 127.0);
