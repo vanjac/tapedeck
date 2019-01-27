@@ -58,6 +58,8 @@
 
 #define CTL_JOG_DA          48
 #define CTL_JOG_DB          49
+#define CTL_JOG_PRESSED_DA  50
+#define CTL_JOG_PRESSED_DB  51
 #define CTL_PITCH_DA        52
 #define CTL_PITCH_DB        53
 #define CTL_VOL_DA          54
