@@ -43,6 +43,7 @@ void tape_record(Tape * tape, uint8_t * in_buffer) {
         return;
     if (tape->pt_head >= tape->pt_end) {
         if (tape->pt_head > TAPE_MAX(tape)) {
+            // stop at end of audio data
             tape->pt_head = TAPE_MAX(tape);
             tape->is_playing = false;
             beep();
@@ -59,11 +60,27 @@ void tape_move(Tape * tape) {
     if (tape->is_playing) {
         tape->pt_head += BUFFER_SIZE;
 
+        if (tape->pt_head - BUFFER_SIZE < tape->pt_out
+            && tape->pt_head >= tape->pt_out) {
+            // if passed out point, do out point action
+            switch(tape->out_point_action) {
+            case OUT_CONTINUE:
+                break;
+            case OUT_LOOP:
+                tape->pt_head = tape->pt_in;
+                break;
+            case OUT_STOP:
+                tape->pt_head = tape->pt_out;
+                tape->is_playing = false;
+                break;
+            }
+        }
+
         if ((tape->pt_head >= tape->pt_end) && !(tape->record)) {
+            // stop at end of tape
             tape->pt_head = tape->pt_end;
             tape->is_playing = false;
         }
-        // TODO: out point action
     }
 
     tape->jog_flag = false;
