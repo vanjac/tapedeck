@@ -112,7 +112,7 @@ void force_set_led(int led, bool state) {
 
 void all_leds_off(void) {
     for (int i = 1; i < NUM_BUTTONS; i++) {
-        set_led(i, false);
+        force_set_led(i, false);
         sleep(0.01);
     }
 }
