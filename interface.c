@@ -66,10 +66,20 @@ void tape_button_pressed(Tape * tape, int button) {
         break;
 // navigation
     case BTN_DECK_PREV:
-        tape->pt_head = tape->pt_start;
+        if (tape->pt_head > tape->pt_out)
+            tape->pt_head = tape->pt_out;
+        else if (tape->pt_head > tape->pt_in)
+            tape->pt_head = tape->pt_in;
+        else
+            tape->pt_head = tape->pt_start;
         break;
     case BTN_DECK_NEXT:
-        tape->pt_head = tape->pt_end;
+        if (tape->pt_head < tape->pt_in)
+            tape->pt_head = tape->pt_in;
+        else if (tape->pt_head < tape->pt_out)
+            tape->pt_head = tape->pt_out;
+        else
+            tape->pt_head = tape->pt_end;
         break;
     case BTN_DECK_PBM:
         tape->pt_in = tape->pt_head;
