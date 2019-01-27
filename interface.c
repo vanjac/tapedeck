@@ -5,7 +5,7 @@
 #include "main.h"
 
 void tape_button_pressed(Tape * tape, int button);
-void tape_interface_update(Tape * tape, bool blink);
+void tape_interface_update(Tape * tape, int tmillis, bool blink);
 int check_button_held(int button, int tmillis);
 
 void tape_jog(Tape * tape, int value);
@@ -107,34 +107,54 @@ void interface_update(void) {
     int tmillis = time_millis();
     bool blink = tmillis % (BLINK_RATE * 2) >= BLINK_RATE;
 
-    tape_interface_update(&tape_a, blink);
-    tape_interface_update(&tape_b, blink);
+    tape_interface_update(&tape_a, tmillis, blink);
+    tape_interface_update(&tape_b, tmillis, blink);
 
     set_led(BTN_SCRATCH, link_tapes);
 }
 
-void tape_interface_update(Tape * tape, bool blink) {
-    int led_start = tape->buttons_start;
-    set_led(led_start + BTN_DECK_PLAY, tape->is_playing);
-    set_led(led_start + BTN_DECK_CUE, tape->record);
-    set_led(led_start + BTN_DECK_LISTEN, tape->loopback);
+void tape_interface_update(Tape * tape, int tmillis, bool blink) {
+    int btn_start = tape->buttons_start;
+
+    if (check_button_held(btn_start + BTN_DECK_PBM, tmillis)) {
+        // set start of tape
+        tape->pt_start = tape->pt_head;
+        if (tape->pt_in < tape->pt_start)
+            tape->pt_in = tape->pt_start;
+        if (tape->pt_out < tape->pt_start)
+            tape->pt_out = tape->pt_start;
+        beep();
+    }
+    if (check_button_held(btn_start + BTN_DECK_PBP, tmillis)) {
+        // set end of tape
+        tape->pt_end = tape->pt_head;
+        if (tape->pt_in > tape->pt_end)
+            tape->pt_in = tape->pt_end;
+        if (tape->pt_out > tape->pt_end)
+            tape->pt_out = tape->pt_end;
+        beep();
+    }
+
+    set_led(btn_start + BTN_DECK_PLAY, tape->is_playing);
+    set_led(btn_start + BTN_DECK_CUE, tape->record);
+    set_led(btn_start + BTN_DECK_LISTEN, tape->loopback);
 
     switch(tape->out_point_action) {
     case OUT_CONTINUE:
-        set_led(led_start + BTN_DECK_SYNC, false);
+        set_led(btn_start + BTN_DECK_SYNC, false);
         break;
     case OUT_LOOP:
-        set_led(led_start + BTN_DECK_SYNC, true);
+        set_led(btn_start + BTN_DECK_SYNC, true);
         break;
     case OUT_STOP:
-        set_led(led_start + BTN_DECK_SYNC, blink);
+        set_led(btn_start + BTN_DECK_SYNC, blink);
         break;
     }
 
-    set_led(led_start + BTN_DECK_LOOP_KP1, tape->pt_head == tape->pt_start);
-    set_led(led_start + BTN_DECK_LOOP_KP2, tape->pt_head == tape->pt_in);
-    set_led(led_start + BTN_DECK_LOOP_KP3, tape->pt_head == tape->pt_out);
-    set_led(led_start + BTN_DECK_LOOP_KP4, tape->pt_head == tape->pt_end);
+    set_led(btn_start + BTN_DECK_LOOP_KP1, tape->pt_head == tape->pt_start);
+    set_led(btn_start + BTN_DECK_LOOP_KP2, tape->pt_head == tape->pt_in);
+    set_led(btn_start + BTN_DECK_LOOP_KP3, tape->pt_head == tape->pt_out);
+    set_led(btn_start + BTN_DECK_LOOP_KP4, tape->pt_head == tape->pt_end);
 }
 
 int check_button_held(int button, int tmillis) {
