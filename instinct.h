@@ -54,8 +54,6 @@
 
 /* CONTROLS */
 
-#define NUM_CONTROLS        64
-
 #define CTL_JOG_DA          48
 #define CTL_JOG_DB          49
 #define CTL_JOG_PRESSED_DA  50
@@ -76,8 +74,6 @@
 // 0 for not currently pressed
 // nonzero for time button was pressed
 long button_presses[NUM_BUTTONS];
-
-unsigned char control_values[NUM_CONTROLS];
 
 bool led_states[NUM_BUTTONS];
 

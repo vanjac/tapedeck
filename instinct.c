@@ -92,7 +92,6 @@ void interpret_midi_message(unsigned char b1, unsigned char b2, unsigned char b3
             button_presses[b2] = 0;
         }
     } else if (b1 == 176) { // control event
-        control_values[b2] = b3;
         control_changed(b2, b3);
     }
 }
