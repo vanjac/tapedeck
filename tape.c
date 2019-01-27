@@ -32,7 +32,6 @@ int tape_playback(Tape * tape, uint8_t * out_buffer) {
         return 0;
     }
 
-    // TODO: volume
     for (int i = 0; i < BUFFER_SIZE; i++)
         out_buffer[i] = *(tape->pt_head + i);
     return 1;

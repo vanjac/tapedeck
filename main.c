@@ -7,9 +7,14 @@
 #include "interface.h"
 
 void mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
-         bool enable1, bool enable2, bool enable3);
-void mix_sample(uint8_t * in, int * out);
+         bool enable1, bool enable2, bool enable3,
+         float vol1, float vol2, float vol3);
 void beep_sample(uint8_t * out);
+
+// read/write a two-byte sample
+// the byte at ptr and the byte after it will be used
+short read_sample(uint8_t * ptr);
+void write_sample(uint8_t * ptr, short sample);
 
 int main(int argc, char *argv[]) {
     if (instinct_open())
@@ -22,6 +27,8 @@ int main(int argc, char *argv[]) {
         return 1;
     tape_a.buttons_start = BTNS_DECK_A;
     tape_b.buttons_start = BTNS_DECK_B;
+
+    audio_in_volume = 1.0;
 
     uint8_t audio_in_buffer[BUFFER_SIZE];
     uint8_t tape_a_out_buffer[BUFFER_SIZE];
@@ -39,8 +46,9 @@ int main(int argc, char *argv[]) {
         int b_play = tape_playback(&tape_b, tape_b_out_buffer);
 
         // mix recording
-        mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer,
-            mix_buffer, a_play && tape_a.loopback, b_play && tape_b.loopback, true);
+        mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer, mix_buffer,
+            a_play && tape_a.loopback, b_play && tape_b.loopback, true,
+            tape_a.volume, tape_b.volume, audio_in_volume);
         tape_record(&tape_a, mix_buffer);
         tape_record(&tape_b, mix_buffer);
 
@@ -48,8 +56,9 @@ int main(int argc, char *argv[]) {
             beep_sample(mix_buffer);
         else
             // mix playback
-            mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer,
-                mix_buffer, a_play, b_play, true);
+            mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer, mix_buffer,
+                a_play, b_play, true,
+                tape_a.volume, tape_b.volume, audio_in_volume);
 
         if (audio_write(mix_buffer))
             break;
@@ -66,32 +75,35 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+short read_sample(uint8_t * ptr) {
+    return *(ptr + 1) << 8 | *ptr; // little endian
+}
+
+void write_sample(uint8_t * ptr, short sample) {
+    // little endian
+    *(ptr + 1) = (sample >> 8) & 0xFF;
+    *ptr = sample & 0xFF;
+}
+
 // depends on sample format being PA_SAMPLE_S16LE
 // Signed 16 bit, little endian
 void mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
-         bool enable1, bool enable2, bool enable3) {
+         bool enable1, bool enable2, bool enable3,
+         float vol1, float vol2, float vol3) {
     for (int i = 0; i < BUFFER_SIZE; i += 2) {
         int mixed = 0;
         if (enable1)
-            mix_sample(in1 + i, &mixed);
+            mixed += read_sample(in1 + i) * vol1;
         if (enable2)
-            mix_sample(in2 + i, &mixed);
+            mixed += read_sample(in2 + i) * vol2;
         if (enable3)
-            mix_sample(in3 + i, &mixed);
+            mixed += read_sample(in3 + i) * vol3;
         if (mixed > 32767)
             mixed = 32767;
         else if (mixed < -32768)
             mixed = -32768;
-        short mixed_short = mixed;
-        // little endian
-        out[i + 1] = (mixed_short >> 8) & 0xFF;
-        out[i] = mixed_short & 0xFF;
+        write_sample(out + i, mixed);
     }
-}
-
-void mix_sample(uint8_t * in, int * out) {
-    short in_value = *(in + 1) << 8 | *in; // little endian
-    *out += in_value;
 }
 
 int time_millis(void) {
@@ -108,8 +120,8 @@ void beep_sample(uint8_t * out) {
     for (int i = 0; i < BUFFER_SIZE; i += 4) {
         short sample = beep_time * 1486; // should be about 1000 Hz
         sample /= 6;
-        out[i + 1] = out[i + 3] = (sample >> 8) & 0xFF;
-        out[i + 0] = out[i + 2] = sample & 0xFF;
+        write_sample(out + i, sample);
+        write_sample(out + i + 2, sample);
         beep_time++;
     }
     if (beep_time >= 4096)
