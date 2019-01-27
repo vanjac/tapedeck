@@ -2,6 +2,20 @@
 #include <stdio.h>
 #include <string.h>
 
+#define FMT_CHUNK_ID "fmt "
+#define CUE_CHUNK_ID "cue "
+#define DATA_CHUNK_ID "data"
+
+#define FMT_CHUNK_SIZE 16
+// 4 byte count + 2 cue points (24 bytes per cue)
+#define CUE_CHUNK_SIZE 52
+
+#define IN_CUE_ID 1
+#define OUT_CUE_ID 2
+
+// https://sites.google.com/site/musicgapi/technical-documents/wav-file-format
+
+
 int read_file(FILE * file, Tape * tape);
 void read_fourcc(FILE * file, char * fourcc);
 // return length
@@ -10,11 +24,14 @@ unsigned int read_chunk_head(FILE * file, char * id);
 unsigned short read_uint16(FILE * file);
 unsigned int read_uint32(FILE * file);
 void read_chunk_fmt(FILE * file);
+void read_chunk_cue(FILE * file, Tape * tape);
+void read_chunk_data(FILE * file, unsigned int chunk_size, Tape * tape);
 
 int write_file(FILE * file, Tape * tape);
 void write_fourcc(FILE * file, char * fourcc);
 void write_uint16(FILE * file, unsigned short value);
 void write_uint32(FILE * file, unsigned int value);
+void write_cue(FILE * file, unsigned int id, unsigned int position);
 
 
 /* LOADING */
@@ -62,17 +79,15 @@ int read_file(FILE * file, Tape * tape) {
         unsigned int chunk_size = read_chunk_head(file, chunk_id);
         printf("%s %d\n", chunk_id, chunk_size);
 
-        if (!strcmp(chunk_id, "fmt "))
+        if (chunk_size % 2 == 1)
+            chunk_size ++; // chunks are always word-aligned
+
+        if (!strcmp(chunk_id, FMT_CHUNK_ID))
             read_chunk_fmt(file);
-        else if (!strcmp(chunk_id, "data")) {
-            unsigned int read_size = chunk_size;
-            if (read_size > TAPE_MAX(tape) - tape->pt_start) {
-                fprintf(stderr, "File is too large!\n");
-                read_size = TAPE_MAX(tape) - tape->pt_start;
-            }
-            fread(tape->pt_start, 1, read_size, file);
-            tape->pt_end = tape->pt_start + read_size;
-        }
+        else if (!strcmp(chunk_id, CUE_CHUNK_ID))
+            read_chunk_cue(file, tape);
+        else if (!strcmp(chunk_id, DATA_CHUNK_ID))
+            read_chunk_data(file, chunk_size, tape);
 
         pos += 8 + chunk_size;
     }
@@ -116,6 +131,35 @@ void read_chunk_fmt(FILE * file) {
     printf("Format: %d\nNum channels: %d\nSample rate: %d\nData rate: %d\nBlock size: %d\nBits per sample: %d\n", format, n_channels, sample_rate, data_rate, block_size, bits_per_sample);
 }
 
+void read_chunk_cue(FILE * file, Tape * tape) {
+    unsigned int num_cues = read_uint32(file);
+    for (int i = 0; i < num_cues; i++) {
+        unsigned int cue_id = read_uint32(file);
+        fseek(file, 12, SEEK_CUR);
+        unsigned int cue_pos = read_uint32(file);
+        fseek(file, 4, SEEK_CUR);
+        printf("Cue %d at %d\n", cue_id, cue_pos);
+
+        if (cue_pos > TAPE_MAX(tape) - tape->pt_start) {
+            fprintf(stderr, "Cue past end of tape!\n");
+            cue_pos = TAPE_MAX(tape) - tape->pt_start;
+        }
+        if (cue_id == IN_CUE_ID)
+            tape->pt_in = cue_pos + tape->pt_start;
+        else if (cue_id = OUT_CUE_ID)
+            tape->pt_out = cue_pos + tape->pt_start;
+    }
+}
+
+void read_chunk_data(FILE * file, unsigned int chunk_size, Tape * tape) {
+    if (chunk_size > TAPE_MAX(tape) - tape->pt_start) {
+        fprintf(stderr, "File is too large!\n");
+        chunk_size = TAPE_MAX(tape) - tape->pt_start;
+    }
+    fread(tape->pt_start, 1, chunk_size, file);
+    tape->pt_end = tape->pt_start + chunk_size;
+}
+
 
 /* SAVING */
 
@@ -140,14 +184,14 @@ int write_file(FILE * file, Tape * tape) {
     write_fourcc(file, "RIFF");
 
     int data_chunk_size = tape->pt_end - tape->pt_start;
-    // "WAVE" + fmt chunk + data chunk
-    int riff_size = 4 + (8 + 16) + (8 + data_chunk_size);
+    int riff_size = 4 + (8 + FMT_CHUNK_SIZE) + (8 + data_chunk_size)
+        + (8 + CUE_CHUNK_SIZE);
     write_uint32(file, riff_size);
 
     write_fourcc(file, "WAVE");
 
-    write_fourcc(file, "fmt ");
-    write_uint32(file, 16); // size of format chunk
+    write_fourcc(file, FMT_CHUNK_ID); // begin format chunk
+    write_uint32(file, FMT_CHUNK_SIZE);
     write_uint16(file, 1); // format code
     write_uint16(file, 2); // num channels
     write_uint32(file, 44100); // sample rate
@@ -155,8 +199,14 @@ int write_file(FILE * file, Tape * tape) {
     write_uint16(file, 4); // block size
     write_uint16(file, 16); // bits per sample
 
-    write_fourcc(file, "data");
-    write_uint32(file, data_chunk_size);
+    write_fourcc(file, CUE_CHUNK_ID); // begin cue chunk
+    write_uint32(file, CUE_CHUNK_SIZE);
+    write_uint32(file, 2); // num cue points
+    write_cue(file, IN_CUE_ID, tape->pt_in - tape->pt_start);
+    write_cue(file, OUT_CUE_ID, tape->pt_out - tape->pt_start);
+
+    write_fourcc(file, DATA_CHUNK_ID); // begin data chunk
+    write_uint32(file, data_chunk_size); // size of data chunk
     fwrite(tape->pt_start, 1, data_chunk_size, file);
 }
 
@@ -176,3 +226,11 @@ void write_uint32(FILE * file, unsigned int value) {
         fputc((value >> (i * 8)) & 0xFF, file);
 }
 
+void write_cue(FILE * file, unsigned int id, unsigned int position) {
+    write_uint32(file, id);
+    write_uint32(file, 0);
+    write_fourcc(file, DATA_CHUNK_ID);
+    write_uint32(file, 0);
+    write_uint32(file, position);
+    write_uint32(file, position);
+}
