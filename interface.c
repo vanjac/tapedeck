@@ -6,6 +6,7 @@
 
 void tape_button_pressed(Tape * tape, int button);
 void tape_interface_update(Tape * tape, bool blink);
+int check_button_held(int button, int tmillis);
 
 void tape_jog(Tape * tape, int value);
 
@@ -103,7 +104,8 @@ void tape_button_pressed(Tape * tape, int button) {
 }
 
 void interface_update(void) {
-    bool blink = time_millis() % (BLINK_RATE * 2) >= BLINK_RATE;
+    int tmillis = time_millis();
+    bool blink = tmillis % (BLINK_RATE * 2) >= BLINK_RATE;
 
     tape_interface_update(&tape_a, blink);
     tape_interface_update(&tape_b, blink);
@@ -133,6 +135,14 @@ void tape_interface_update(Tape * tape, bool blink) {
     set_led(led_start + BTN_DECK_LOOP_KP2, tape->pt_head == tape->pt_in);
     set_led(led_start + BTN_DECK_LOOP_KP3, tape->pt_head == tape->pt_out);
     set_led(led_start + BTN_DECK_LOOP_KP4, tape->pt_head == tape->pt_end);
+}
+
+int check_button_held(int button, int tmillis) {
+    if (button_presses[button] && tmillis - button_presses[button] > HOLD_TIME) {
+        button_presses[button] = 0;
+        return 1;
+    }
+    return 0;
 }
 
 void tape_jog(Tape * tape, int value) {

@@ -94,10 +94,10 @@ void mix_sample(uint8_t * in, int * out) {
     *out += in_value;
 }
 
-long time_millis(void) {
+int time_millis(void) {
     struct timeval time;
     gettimeofday(&time, NULL);
-    return time.tv_usec / 1000;
+    return time.tv_sec * 1000 + time.tv_usec / 1000;
 }
 
 void beep(void) {
