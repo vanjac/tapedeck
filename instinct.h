@@ -77,7 +77,7 @@
 // nonzero for time button was pressed
 long button_presses[NUM_BUTTONS];
 
-long control_values[NUM_CONTROLS];
+unsigned char control_values[NUM_CONTROLS];
 
 bool led_states[NUM_BUTTONS];
 

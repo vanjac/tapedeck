@@ -1,5 +1,6 @@
 #include "main.h"
 #include <stdio.h>
+#include <sys/time.h>
 #include "tape.h"
 #include "instinct.h"
 #include "audio.h"
@@ -91,6 +92,12 @@ void mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
 void mix_sample(uint8_t * in, int * out) {
     short in_value = *(in + 1) << 8 | *in; // little endian
     *out += in_value;
+}
+
+long time_millis(void) {
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    return time.tv_usec / 1000;
 }
 
 void beep(void) {

@@ -1,10 +1,11 @@
 #include "interface.h"
+#include <time.h>
 #include "instinct.h"
 #include "tape.h"
 #include "main.h"
 
 void tape_button_pressed(Tape * tape, int button);
-void tape_interface_update(Tape * tape);
+void tape_interface_update(Tape * tape, bool blink);
 
 void tape_jog(Tape * tape, int value);
 
@@ -85,21 +86,48 @@ void tape_button_pressed(Tape * tape, int button) {
     case BTN_DECK_PBP:
         tape->pt_out = tape->pt_head;
         break;
+// other
+    case BTN_DECK_SYNC:
+        switch (tape->out_point_action) {
+        case OUT_CONTINUE:
+            tape->out_point_action = OUT_LOOP;
+            break;
+        case OUT_LOOP:
+            tape->out_point_action = OUT_STOP;
+            break;
+        default:
+            tape->out_point_action = OUT_CONTINUE;
+        }
+        break;
     }
 }
 
 void interface_update(void) {
-    tape_interface_update(&tape_a);
-    tape_interface_update(&tape_b);
+    bool blink = time_millis() % (BLINK_RATE * 2) >= BLINK_RATE;
+
+    tape_interface_update(&tape_a, blink);
+    tape_interface_update(&tape_b, blink);
 
     set_led(BTN_SCRATCH, link_tapes);
 }
 
-void tape_interface_update(Tape * tape) {
+void tape_interface_update(Tape * tape, bool blink) {
     int led_start = tape->buttons_start;
     set_led(led_start + BTN_DECK_PLAY, tape->is_playing);
     set_led(led_start + BTN_DECK_CUE, tape->record);
     set_led(led_start + BTN_DECK_LISTEN, tape->loopback);
+
+    switch(tape->out_point_action) {
+    case OUT_CONTINUE:
+        set_led(led_start + BTN_DECK_SYNC, false);
+        break;
+    case OUT_LOOP:
+        set_led(led_start + BTN_DECK_SYNC, true);
+        break;
+    case OUT_STOP:
+        set_led(led_start + BTN_DECK_SYNC, blink);
+        break;
+    }
 
     set_led(led_start + BTN_DECK_LOOP_KP1, tape->pt_head == tape->pt_start);
     set_led(led_start + BTN_DECK_LOOP_KP2, tape->pt_head == tape->pt_in);

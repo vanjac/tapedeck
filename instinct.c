@@ -4,8 +4,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include <time.h>
 #include "interface.h"
+#include "main.h"
 
 #define MIDI_MESSAGE_SIZE 3
 
@@ -86,7 +86,7 @@ int instinct_update(void) {
 void interpret_midi_message(unsigned char b1, unsigned char b2, unsigned char b3) {
     if (b1 == 144) { // note event
         if (b3 >= 64) { // note on
-            button_presses[b2] = clock();
+            button_presses[b2] = time_millis();
             button_pressed(b2);
         } else {
             button_presses[b2] = 0;

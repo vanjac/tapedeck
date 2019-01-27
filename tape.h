@@ -6,7 +6,7 @@
 #define TAPE_SIZE 67108864
 #define TAPE_MAX(tape) tape->audio_data + TAPE_SIZE - BUFFER_SIZE
 
-typedef enum {OUT_CONTINUE, OUT_STOP, OUT_LOOP} OutPointAction;
+typedef enum {OUT_CONTINUE, OUT_LOOP, OUT_STOP} OutPointAction;
 
 typedef struct {
     // saved to file
