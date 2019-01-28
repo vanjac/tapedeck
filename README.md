@@ -79,6 +79,7 @@ Other controls:
 - Vinyl button: Toggle linked tapes. When enabled,
 moving either jog wheel or pressing either play/pause
 button will control both tapes.
+- Down arrow button: Exit
 
 ## LED graphs
 
