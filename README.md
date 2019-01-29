@@ -99,6 +99,7 @@ Position graph:
 #####.....  Middle
 #########.  Just before end
 ##########  At end
+.........#  Tape has no data
 ```
 
 In/out graph:
@@ -111,5 +112,6 @@ In/out graph:
 #########.  Just before out point
 ##########  At out point
 .........#  After out point
+#........#  At in and out point (they are the same)
 ```
 
