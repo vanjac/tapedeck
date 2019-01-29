@@ -2,10 +2,10 @@
 
 Tapedeck is an audio editor for Linux with an
 alternative control interface. Instead of a mouse,
-keyboard, and screen, it uses a DJ board (the Hercules
-DJControl Instinct) and a set of LED graph displays
-(not currently implemented, simulated with terminal
-graphics).
+keyboard, and screen, it uses a DJ board (the [Hercules
+DJControl Instinct](https://support.hercules.com/en/product/djcontrolinstinct-en/))
+and a set of LED graph displays (not currently
+implemented, simulated with terminal graphics).
 
 ## Building/Running
 
