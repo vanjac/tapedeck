@@ -17,6 +17,7 @@ void display_close(void) {
 }
 
 void display_update(void) {
+    move(5, 0);
     refresh();
 }
 
