@@ -58,11 +58,9 @@ int load_tape(Tape * tape) {
 
     FILE * file = fopen(path, "rb");
     if (file == NULL) {
-        fprintf(stderr, "Couldn't open file %s\n", path);
-        return 1;
+        return 0; // probably doesn't exist
     }
 
-    printf("Reading file %s\n", path);
     int error = read_file(file, tape);
 
     if (fclose(file)) {
@@ -79,7 +77,7 @@ int read_file(FILE * file, Tape * tape) {
         fprintf(stderr, "Invalid WAV file\n");
         return 1;
     }
-    printf("Size: %d\n", riff_size);
+    //printf("Size: %d\n", riff_size);
     long riff_start = ftell(file);
 
     read_fourcc(file, chunk_id);
@@ -93,13 +91,14 @@ int read_file(FILE * file, Tape * tape) {
     while (pos < riff_start + riff_size) {
         fseek(file, pos, SEEK_SET);
         unsigned int chunk_size = read_chunk_head(file, chunk_id);
-        printf("%s %d\n", chunk_id, chunk_size);
+        //printf("%s %d\n", chunk_id, chunk_size);
 
         if (chunk_size % 2 == 1)
             chunk_size ++; // chunks are always word-aligned
 
         if (!strcmp(chunk_id, FMT_CHUNK_ID))
-            read_chunk_fmt(file);
+            //read_chunk_fmt(file);
+            ; // ignore fmt chunk
         else if (!strcmp(chunk_id, CUE_CHUNK_ID))
             read_chunk_cue(file, tape);
         else if (!strcmp(chunk_id, DATA_CHUNK_ID))
@@ -154,7 +153,6 @@ void read_chunk_cue(FILE * file, Tape * tape) {
         fseek(file, 12, SEEK_CUR);
         unsigned int cue_pos = read_uint32(file);
         fseek(file, 4, SEEK_CUR);
-        printf("Cue %d at %d\n", cue_id, cue_pos);
 
         if (cue_pos > TAPE_MAX(tape) - tape->pt_start) {
             fprintf(stderr, "Cue past end of tape!\n");
@@ -190,7 +188,6 @@ int save_tape(Tape * tape) {
         return 1;
     }
 
-    printf("Writing file %s\n", path);
     write_file(file, tape);
 
     if (fclose(file)) {
