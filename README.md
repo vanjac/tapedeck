@@ -78,7 +78,8 @@ switch between the tabs.
 
 Other controls:
 
-- -/+ buttons: Monitor volume (doesn't affect Loopback)
+- Headphone -/+ buttons: Monitor volume (doesn't affect
+Loopback)
 - Horizontal slider: Audio input level
 - Vinyl button: Toggle linked tapes. When enabled,
 moving either jog wheel or pressing either play/pause
