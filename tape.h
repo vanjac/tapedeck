@@ -40,3 +40,4 @@ void tape_move(Tape * tape);
 // resize tape in/out points to include pt_head
 // return false if tape couldn't expand past audio memory
 int tape_expand(Tape * tape);
+void move_all_tape_points(Tape * tape, long offset);

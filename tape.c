@@ -115,3 +115,10 @@ int tape_expand(Tape * tape) {
     return ret;
 }
 
+void move_all_tape_points(Tape * tape, long offset) {
+    tape->pt_head += offset;
+    tape->pt_start += offset;
+    tape->pt_end += offset;
+    tape->pt_in += offset;
+    tape->pt_out += offset;
+}

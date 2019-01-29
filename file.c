@@ -174,10 +174,13 @@ int read_chunk_cue(FILE * file, Tape * tape) {
 
 int read_chunk_data(FILE * file, unsigned int chunk_size, Tape * tape) {
     int error = 0;
-    if (chunk_size > TAPE_MAX(tape) - tape->pt_start) {
-        fprintf(stderr, "File is too large!\n");
+    if (chunk_size > TAPE_SIZE) {
         error = 1;
-        chunk_size = TAPE_MAX(tape) - tape->pt_start;
+        fprintf(stderr, "File is too large!\n");
+        move_all_tape_points(tape, tape->audio_data - tape->pt_start);
+        chunk_size = TAPE_SIZE;
+    } else if (chunk_size > TAPE_SIZE / 2) {
+        move_all_tape_points(tape, -((long)chunk_size - TAPE_SIZE/2) / 2);
     }
     fread(tape->pt_start, 1, chunk_size, file);
     tape->pt_end = tape->pt_start + chunk_size;
