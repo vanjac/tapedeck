@@ -51,6 +51,7 @@ Per tape:
 - Jog wheel: Jog tape
 - Vertical slider: Tape volume
 - Play/pause button: Play/pause tape
+- Pitch bend: Fast-forward/rewind
 - Cue button: Record switch. Tape will only record while
 it is playing. Recorded audio overwrites existing audio.
 To mix audio instead, enable Loopback.

@@ -12,6 +12,7 @@ void tape_display_update(Tape * tape, int pixel_start, bool blink);
 int check_button_held(int button, unsigned int tmillis);
 
 void tape_jog(Tape * tape, int value);
+void tape_seek(Tape * tape, int value);
 
 int draw_graph(int pixel_start, int length, float value);
 float control_to_volume(int control);
@@ -63,6 +64,22 @@ void control_changed(int control, int value) {
             tape_jog(&tape_b, value);
         } else {
             tape_jog(&tape_b, value);
+        }
+        break;
+    case CTL_PITCH_DA:
+        if (link_tapes) {
+            tape_seek(&tape_a, value);
+            tape_seek(&tape_b, value);
+        } else {
+            tape_seek(&tape_a, value);
+        }
+        break;
+    case CTL_PITCH_DB:
+        if (link_tapes) {
+            tape_seek(&tape_a, value);
+            tape_seek(&tape_b, value);
+        } else {
+            tape_seek(&tape_b, value);
         }
         break;
     }
@@ -227,6 +244,10 @@ void tape_jog(Tape * tape, int value) {
         else if (tape->pt_head >= tape->pt_end)
             tape->pt_head = tape->pt_end;
     }
+}
+
+void tape_seek(Tape * tape, int value) {
+    tape_jog(tape, value == 1 ? 128 - SEEK_SPEED : SEEK_SPEED);
 }
 
 void draw_level(float level) {
