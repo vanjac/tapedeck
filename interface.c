@@ -141,6 +141,10 @@ void tape_button_pressed(Tape * tape, int button) {
             tape->out_point_action = OUT_CONTINUE;
         }
         break;
+    case BTN_DECK_LOAD:
+        tape->invert *= -1;
+        beep();
+        break;
     default:
         if (button - tape->buttons_start <= BTN_DECK_CUE_KP4) {
             if (save_tape(tape))

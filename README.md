@@ -75,6 +75,7 @@ while playing.
 - Number keypad: Swap tapes. There are 16 tapes in a
 library, split across 4 tabs. Use the Mode button to
 switch between the tabs.
+- Load button: Invert audio output.
 
 Other controls:
 

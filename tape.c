@@ -24,6 +24,7 @@ void tape_reset(Tape * tape) {
     tape->loopback = false;
     tape->out_point_action = OUT_CONTINUE;
     tape->volume = 1.0;
+    tape->invert = 1;
     tape->jog_flag = 0;
 }
 
