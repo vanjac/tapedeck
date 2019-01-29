@@ -17,10 +17,6 @@ Build with `make`. Compiles to `tapedeck.out`. Run in a
 terminal. To run you must have the DJ board connected
 as a MIDI device, and sound input/output devices.
 
-Tapes are currently loaded/saved to `a.wav` and `b.wav`.
-Eventually there will be controls to select different
-files.
-
 ## Interface Components
 
 ### Tape Decks
@@ -71,6 +67,9 @@ while playing.
     - Off: Continue
     - On: Loop to in point
     - Flashing: Stop
+- Number keypad: Swap tapes. There are 16 tapes in a
+library, split across 4 tabs. Use the Mode button to
+switch between the tabs.
 
 Other controls:
 
