@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#define TAPE_PATH_SIZE 16
+
 #define FMT_CHUNK_ID "fmt "
 #define CUE_CHUNK_ID "cue "
 #define DATA_CHUNK_ID "data"
@@ -34,11 +36,25 @@ void write_uint32(FILE * file, unsigned int value);
 void write_cue(FILE * file, unsigned int id, unsigned int position);
 
 
+void path_for_tape(Tape * tape, char * path_out) {
+    path_out[0] = "ESLC"[tape->tape_num / 4]; // effect sample loop cue
+    path_out[1] = "1234"[tape->tape_num % 4];
+    path_out[2] = '.'; // yes this is good code
+    path_out[3] = 'w';
+    path_out[4] = 'a';
+    path_out[5] = 'v';
+    path_out[6] = 0;
+}
+
+
 /* LOADING */
 
 
-int load_tape(char * path, Tape * tape) {
+int load_tape(Tape * tape) {
     tape_reset(tape);
+
+    char path[TAPE_PATH_SIZE];
+    path_for_tape(tape, path);
 
     FILE * file = fopen(path, "rb");
     if (file == NULL) {
@@ -164,7 +180,10 @@ void read_chunk_data(FILE * file, unsigned int chunk_size, Tape * tape) {
 /* SAVING */
 
 
-int save_tape(char * path, Tape * tape) {
+int save_tape(Tape * tape) {
+    char path[TAPE_PATH_SIZE];
+    path_for_tape(tape, path);
+
     FILE * file = fopen(path, "wb");
     if (file == NULL) {
         fprintf(stderr, "Couldn't write file %s\n", path);

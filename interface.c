@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "instinct.h"
-#include "tape.h"
+#include "file.h"
 #include "main.h"
 #include "display.h"
 
@@ -118,6 +118,12 @@ void tape_button_pressed(Tape * tape, int button) {
             tape->out_point_action = OUT_CONTINUE;
         }
         break;
+    default:
+        if (button - tape->buttons_start <= BTN_DECK_CUE_KP4) {
+            save_tape(tape);
+            tape->tape_num = button - tape->buttons_start;
+            load_tape(tape);
+        }
     }
 }
 
@@ -171,10 +177,8 @@ void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink) {
         break;
     }
 
-    set_led(btn_start + BTN_DECK_LOOP_KP1, tape->pt_head == tape->pt_start);
-    set_led(btn_start + BTN_DECK_LOOP_KP2, tape->pt_head == tape->pt_in);
-    set_led(btn_start + BTN_DECK_LOOP_KP3, tape->pt_head == tape->pt_out);
-    set_led(btn_start + BTN_DECK_LOOP_KP4, tape->pt_head == tape->pt_end);
+    for (int i = 0; i < TAPE_LIBRARY_SIZE; i++)
+        set_led(btn_start + i, i == tape->tape_num);
 }
 
 void tape_display_update(Tape * tape, int pixel_start, bool blink) {

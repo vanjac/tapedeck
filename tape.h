@@ -6,12 +6,13 @@
 // with sample rate of 44100 Hz, 16 bit samples, 2 channels
 #define TAPE_SIZE 67108864
 #define TAPE_MAX(tape) tape->audio_data + TAPE_SIZE - BUFFER_SIZE
+#define TAPE_LIBRARY_SIZE 16
 
 typedef enum {OUT_CONTINUE, OUT_LOOP, OUT_STOP} OutPointAction;
 
 typedef struct {
     // saved to file
-    unsigned short num;
+    unsigned char tape_num;
     uint8_t *audio_data;
     // these should all be multiples of BUFFER_SIZE away from the start!
     uint8_t *pt_head, *pt_start, *pt_end, *pt_in, *pt_out;

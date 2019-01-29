@@ -30,11 +30,13 @@ int main(int argc, char *argv[]) {
         return 1;
     if (tape_init(&tape_b))
         return 1;
+
     tape_a.buttons_start = BTNS_DECK_A;
     tape_b.buttons_start = BTNS_DECK_B;
-
-    load_tape("a.wav", &tape_a);
-    load_tape("b.wav", &tape_b);
+    tape_a.tape_num = 8; // L1
+    tape_b.tape_num = 9; // L2
+    load_tape(&tape_a);
+    load_tape(&tape_b);
 
     audio_in_volume = 1.0;
 
@@ -81,8 +83,8 @@ int main(int argc, char *argv[]) {
 
     printf("Quit\n");
 
-    save_tape("a.wav", &tape_a);
-    save_tape("b.wav", &tape_b);
+    save_tape(&tape_a);
+    save_tape(&tape_b);
 
     instinct_close();
     display_close();
