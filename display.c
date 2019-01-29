@@ -28,9 +28,38 @@ void set_pixel(int num, bool value) {
 void force_set_pixel(int num, bool value) {
     display_pixels[num] = value;
 
+    int led_panel_num = num / DISPLAY_LENGTH;
+
+    int row, col;
+    switch (led_panel_num) {
+    case 0:
+        col = 0;
+        row = 0;
+        break;
+    case 1:
+        col = 0;
+        row = 1;
+        break;
+    case 2:
+        col = DISPLAY_LENGTH + 2;
+        row = 0;
+        break;
+    case 3:
+        col = DISPLAY_LENGTH + 2;
+        row = 1;
+        break;
+    case 4:
+        col = 1;
+        row = 3;
+        break;
+    case 5:
+        col = DISPLAY_LENGTH + 1;
+        row = 3;
+        break;
+    }
+    col += num % DISPLAY_LENGTH;
+
     char c = value ? '#' : '.';
-    int row = num / (DISPLAY_LENGTH * 2);
-    int col = num % (DISPLAY_LENGTH * 2);
     mvprintw(row, col, "%c", c);
 }
 
