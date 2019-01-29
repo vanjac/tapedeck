@@ -26,8 +26,8 @@ unsigned int read_chunk_head(FILE * file, char * id);
 unsigned short read_uint16(FILE * file);
 unsigned int read_uint32(FILE * file);
 void read_chunk_fmt(FILE * file);
-void read_chunk_cue(FILE * file, Tape * tape);
-void read_chunk_data(FILE * file, unsigned int chunk_size, Tape * tape);
+int read_chunk_cue(FILE * file, Tape * tape);
+int read_chunk_data(FILE * file, unsigned int chunk_size, Tape * tape);
 
 int write_file(FILE * file, Tape * tape);
 void write_fourcc(FILE * file, char * fourcc);
@@ -70,6 +70,7 @@ int load_tape(Tape * tape) {
 }
 
 int read_file(FILE * file, Tape * tape) {
+    int error = 0;
     char chunk_id[5] = {0,0,0,0,0};
 
     unsigned int riff_size = read_chunk_head(file, chunk_id);
@@ -96,18 +97,21 @@ int read_file(FILE * file, Tape * tape) {
         if (chunk_size % 2 == 1)
             chunk_size ++; // chunks are always word-aligned
 
-        if (!strcmp(chunk_id, FMT_CHUNK_ID))
+        if (!strcmp(chunk_id, FMT_CHUNK_ID)) {
             //read_chunk_fmt(file);
-            ; // ignore fmt chunk
-        else if (!strcmp(chunk_id, CUE_CHUNK_ID))
-            read_chunk_cue(file, tape);
-        else if (!strcmp(chunk_id, DATA_CHUNK_ID))
-            read_chunk_data(file, chunk_size, tape);
+            // ignore fmt chunk
+        } else if (!strcmp(chunk_id, CUE_CHUNK_ID)) {
+            if (read_chunk_cue(file, tape))
+                error = 1;
+        } else if (!strcmp(chunk_id, DATA_CHUNK_ID)) {
+            if (read_chunk_data(file, chunk_size, tape))
+                error = 1;
+        }
 
         pos += 8 + chunk_size;
     }
 
-    return 0;
+    return error;
 }
 
 
@@ -146,7 +150,8 @@ void read_chunk_fmt(FILE * file) {
     printf("Format: %d\nNum channels: %d\nSample rate: %d\nData rate: %d\nBlock size: %d\nBits per sample: %d\n", format, n_channels, sample_rate, data_rate, block_size, bits_per_sample);
 }
 
-void read_chunk_cue(FILE * file, Tape * tape) {
+int read_chunk_cue(FILE * file, Tape * tape) {
+    int error = 0;
     unsigned int num_cues = read_uint32(file);
     for (int i = 0; i < num_cues; i++) {
         unsigned int cue_id = read_uint32(file);
@@ -156,6 +161,7 @@ void read_chunk_cue(FILE * file, Tape * tape) {
 
         if (cue_pos > TAPE_MAX(tape) - tape->pt_start) {
             fprintf(stderr, "Cue past end of tape!\n");
+            error = 1;
             cue_pos = TAPE_MAX(tape) - tape->pt_start;
         }
         if (cue_id == IN_CUE_ID)
@@ -163,15 +169,19 @@ void read_chunk_cue(FILE * file, Tape * tape) {
         else if (cue_id = OUT_CUE_ID)
             tape->pt_out = cue_pos + tape->pt_start;
     }
+    return error;
 }
 
-void read_chunk_data(FILE * file, unsigned int chunk_size, Tape * tape) {
+int read_chunk_data(FILE * file, unsigned int chunk_size, Tape * tape) {
+    int error = 0;
     if (chunk_size > TAPE_MAX(tape) - tape->pt_start) {
         fprintf(stderr, "File is too large!\n");
+        error = 1;
         chunk_size = TAPE_MAX(tape) - tape->pt_start;
     }
     fread(tape->pt_start, 1, chunk_size, file);
     tape->pt_end = tape->pt_start + chunk_size;
+    return error;
 }
 
 

@@ -19,6 +19,8 @@ void beep_sample(uint8_t * out);
 short read_sample(uint8_t * ptr);
 void write_sample(uint8_t * ptr, short sample);
 
+int beep_time;
+
 int main(int argc, char *argv[]) {
     if (instinct_open())
         return 1;
@@ -35,8 +37,10 @@ int main(int argc, char *argv[]) {
     tape_b.buttons_start = BTNS_DECK_B;
     tape_a.tape_num = 8; // L1
     tape_b.tape_num = 9; // L2
-    load_tape(&tape_a);
-    load_tape(&tape_b);
+    if (load_tape(&tape_a))
+        beep();
+    if (load_tape(&tape_b))
+        beep();
 
     audio_in_volume = 1.0;
 
@@ -67,7 +71,7 @@ int main(int argc, char *argv[]) {
         float peak = mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer, mix_buffer,
             a_play, b_play, true,
             tape_a.volume, tape_b.volume, audio_in_volume);
-        if (beep_time >= 0)
+        if (beep_time)
             beep_sample(mix_buffer);
 
         draw_level(exponential_volume_to_linear(peak));
@@ -147,7 +151,7 @@ float exponential_volume_to_linear(float exponential) {
 }
 
 void beep(void) {
-    beep_time = 0;
+    beep_time = BEEP_SAMPLES;
 }
 
 void beep_sample(uint8_t * out) {
@@ -156,8 +160,6 @@ void beep_sample(uint8_t * out) {
         sample /= 6;
         write_sample(out + i, sample);
         write_sample(out + i + 2, sample);
-        beep_time++;
+        beep_time--;
     }
-    if (beep_time >= 4096)
-        beep_time = -1;
 }

@@ -120,9 +120,11 @@ void tape_button_pressed(Tape * tape, int button) {
         break;
     default:
         if (button - tape->buttons_start <= BTN_DECK_CUE_KP4) {
-            save_tape(tape);
+            if (save_tape(tape))
+                beep();
             tape->tape_num = button - tape->buttons_start;
-            load_tape(tape);
+            if (load_tape(tape))
+                beep();
         }
     }
 }
