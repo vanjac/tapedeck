@@ -92,6 +92,12 @@ void tape_button_pressed(Tape * tape, int button) {
         tape->is_playing = !tape->is_playing;
         if (link_tapes)
             tape_a.is_playing = tape_b.is_playing = tape->is_playing;
+        if (!tape->is_playing) {
+            if (link_tapes)
+                tape_a.record = tape_b.record = false;
+            else
+                tape->record = false;
+        }
         break;
     case BTN_DECK_CUE:
         tape->record = !tape->record;
