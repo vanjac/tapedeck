@@ -9,13 +9,17 @@ graphics).
 
 ## Building/Running
 
-Required: ALSA
+Required components: ALSA
 
 Required development libraries: PulseAudio, ncurses
 
 Build with `make`. Compiles to `tapedeck.out`. Run in a
 terminal. To run you must have the DJ board connected
 as a MIDI device, and sound input/output devices.
+
+Tapes are read and stored as `.wav` files in the current
+directory. They are named with a letter (L,E,S,C) and a
+number (1 through 4), like `L1.wav`.
 
 ## Interface Components
 
