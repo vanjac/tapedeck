@@ -22,7 +22,6 @@ typedef struct {
     bool record, loopback;
     OutPointAction out_point_action;
     float volume;
-    char invert; // 1 or -1
 
     unsigned char jog_flag; // number of times jog sample should be played
 

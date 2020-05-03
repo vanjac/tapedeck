@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
         // mix recording
         mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer, mix_buffer,
             a_play && tape_a.loopback, b_play && tape_b.loopback, true,
-            tape_a.volume * tape_a.invert, tape_b.volume * tape_b.invert,
+            tape_a.volume, tape_b.volume,
             audio_in_volume);
         tape_record(&tape_a, mix_buffer);
         tape_record(&tape_b, mix_buffer);
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
         // mix playback
         float peak = mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer, mix_buffer,
             a_play, b_play, true,
-            tape_a.volume * tape_a.invert, tape_b.volume * tape_b.invert,
+            tape_a.volume, tape_b.volume,
             audio_in_volume);
         if (beep_time)
             beep_sample(mix_buffer);
