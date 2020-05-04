@@ -1,5 +1,5 @@
 #define BLINK_RATE 256
-#define HOLD_TIME 1000
+#define HOLD_TIME 700
 #define JOG_REPEAT_COUNT 2
 #define SEEK_SPEED 16
 
