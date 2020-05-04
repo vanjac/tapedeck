@@ -222,11 +222,11 @@ int write_file(FILE * file, Tape * tape) {
     write_fourcc(file, FMT_CHUNK_ID); // begin format chunk
     write_uint32(file, FMT_CHUNK_SIZE);
     write_uint16(file, 1); // format code
-    write_uint16(file, 2); // num channels
-    write_uint32(file, 44100); // sample rate
+    write_uint16(file, TAPE_CHANNELS); // num channels
+    write_uint32(file, FRAME_RATE); // sample rate
     write_uint32(file, 45328); // data rate
-    write_uint16(file, 4); // block size
-    write_uint16(file, 16); // bits per sample
+    write_uint16(file, TAPE_BYTES_PER_FRAME); // block size
+    write_uint16(file, BYTES_PER_SAMPLE * 8); // bits per sample
 
     write_fourcc(file, CUE_CHUNK_ID); // begin cue chunk
     write_uint32(file, CUE_CHUNK_SIZE);

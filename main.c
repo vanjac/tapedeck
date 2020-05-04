@@ -116,7 +116,7 @@ float mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
          bool enable1, bool enable2, bool enable3,
          float vol1, float vol2, float vol3) {
     int peak = 0;
-    for (int i = 0; i < BUFFER_SIZE; i += 2) {
+    for (int i = 0; i < BUFFER_SIZE; i += BYTES_PER_SAMPLE) {
         int mixed = 0;
         if (enable1)
             mixed += read_sample(in1 + i) * vol1;
@@ -157,11 +157,12 @@ void beep(void) {
 }
 
 void beep_sample(uint8_t * out) {
-    for (int i = 0; i < BUFFER_SIZE; i += 4) {
+    for (int i = 0; i < BUFFER_SIZE; i += OUT_BYTES_PER_FRAME) {
         short sample = beep_time * 1486; // should be about 1000 Hz
         sample /= 6;
-        write_sample(out + i, sample);
-        write_sample(out + i + 2, sample);
+        for (int c = 0; c < OUT_CHANNELS; c++) {
+            write_sample(out + i + BYTES_PER_SAMPLE * c, sample);
+        }
         beep_time--;
     }
 }

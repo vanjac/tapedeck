@@ -9,8 +9,8 @@ pa_simple *record_stream;
 int audio_open(void) {
     static const pa_sample_spec sample_spec = {
         .format = PA_SAMPLE_S16LE,
-        .rate = 44100,
-        .channels = 2
+        .rate = FRAME_RATE,
+        .channels = OUT_CHANNELS
     };
 
     static const pa_buffer_attr playback_buff_attr = {
