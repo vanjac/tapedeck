@@ -4,7 +4,7 @@
 #include "main.h"
 
 int tape_init(Tape * tape) {
-    tape->audio_data = malloc(TAPE_SIZE);
+    tape->audio_data = malloc(TAPE_SAMPLES * sizeof(sample));
     if (!(tape->audio_data))
         return 1;
 
@@ -13,7 +13,7 @@ int tape_init(Tape * tape) {
 }
 
 void tape_reset(Tape * tape) {
-    tape->pt_start = tape->audio_data + (TAPE_SIZE / 4);
+    tape->pt_start = tape->audio_data + (TAPE_SAMPLES / 4);
     tape->pt_end = tape->pt_start;
     tape->pt_in = tape->pt_start;
     tape->pt_out = tape->pt_start;
@@ -31,7 +31,7 @@ void tape_destroy(Tape * tape) {
     free(tape->audio_data);
 }
 
-int tape_playback(Tape * tape, uint8_t * out_buffer) {
+int tape_playback(Tape * tape, sample * out_buffer) {
     if (!(tape->is_playing || tape->jog_flag)) {
         return 0;
     }
@@ -40,12 +40,12 @@ int tape_playback(Tape * tape, uint8_t * out_buffer) {
         return 0;
     }
 
-    for (int i = 0; i < BUFFER_SIZE; i++)
+    for (int i = 0; i < BUFFER_SAMPLES; i++)
         out_buffer[i] = *(tape->pt_head + i);
     return 1;
 }
 
-void tape_record(Tape * tape, uint8_t * in_buffer) {
+void tape_record(Tape * tape, sample * in_buffer) {
     if (!(tape->is_playing && tape->record))
         return;
     if (tape->pt_head >= tape->pt_end) {
@@ -56,18 +56,18 @@ void tape_record(Tape * tape, uint8_t * in_buffer) {
             beep();
         } else {
             // extend tape. will be recorded to so no need to erase
-            tape->pt_end = tape->pt_head + BUFFER_SIZE;
+            tape->pt_end = tape->pt_head + BUFFER_SAMPLES;
         }
     }
-    for (int i = 0; i < BUFFER_SIZE; i++)
+    for (int i = 0; i < BUFFER_SAMPLES; i++)
         *(tape->pt_head + i) = in_buffer[i];
 }
 
 void tape_move(Tape * tape) {
     if (tape->is_playing) {
-        tape->pt_head += BUFFER_SIZE;
+        tape->pt_head += BUFFER_SAMPLES;
 
-        if (tape->pt_head - BUFFER_SIZE < tape->pt_out
+        if (tape->pt_head - BUFFER_SAMPLES < tape->pt_out
             && tape->pt_head >= tape->pt_out) {
             // if passed out point, do out point action
             switch(tape->out_point_action) {
@@ -115,7 +115,7 @@ int tape_expand(Tape * tape) {
     return ret;
 }
 
-void move_all_tape_points(Tape * tape, long offset) {
+void move_all_tape_points(Tape * tape, int offset) {
     tape->pt_head += offset;
     tape->pt_start += offset;
     tape->pt_end += offset;

@@ -207,11 +207,11 @@ void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink) {
 }
 
 void tape_display_update(Tape * tape, int pixel_start, bool blink) {
-    uint8_t * head = tape->pt_head;
-    uint8_t * start = tape->pt_start;
-    uint8_t * end = tape->pt_end;
-    uint8_t * in = tape->pt_in;
-    uint8_t * out = tape->pt_out;
+    sample * head = tape->pt_head;
+    sample * start = tape->pt_start;
+    sample * end = tape->pt_end;
+    sample * in = tape->pt_in;
+    sample * out = tape->pt_out;
 
     draw_graph(pixel_start, DISPLAY_LENGTH - 1,
         (float)(head - start) / (end - start));
@@ -240,7 +240,7 @@ void tape_jog(Tape * tape, int value) {
     if (value >= 64)
         value -= 128;
     tape->jog_flag = JOG_REPEAT_COUNT;
-    tape->pt_head += value * BUFFER_SIZE;
+    tape->pt_head += value * BUFFER_SAMPLES;
     if (tape->record) {
         if (tape_expand(tape))
             beep();

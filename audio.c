@@ -8,7 +8,7 @@ pa_simple *record_stream;
 
 int audio_open(void) {
     static const pa_sample_spec sample_spec = {
-        .format = PA_SAMPLE_S16LE,
+        .format = PA_SAMPLE_FLOAT32,
         .rate = FRAME_RATE,
         .channels = OUT_CHANNELS
     };
@@ -63,18 +63,18 @@ void audio_close(void) {
     pa_simple_free(record_stream);
 }
 
-int audio_read(uint8_t * buffer) {
+int audio_read(sample * buffer) {
     int pa_error;
-    if (pa_simple_read(record_stream, buffer, BUFFER_SIZE, &pa_error) < 0) {
+    if (pa_simple_read(record_stream, buffer, BUFFER_SAMPLES * sizeof(sample), &pa_error) < 0) {
         fprintf(stderr, "Read failed: %s\n", pa_strerror(pa_error));
         return 1;
     }
     return 0;
 }
 
-int audio_write(uint8_t * buffer) {
+int audio_write(sample * buffer) {
     int pa_error;
-    if (pa_simple_write(play_stream, buffer, BUFFER_SIZE, &pa_error) < 0) {
+    if (pa_simple_write(play_stream, buffer, BUFFER_SAMPLES * sizeof(sample), &pa_error) < 0) {
         fprintf(stderr, "Write failed: %s\n", pa_strerror(pa_error));
         return 1;
     }

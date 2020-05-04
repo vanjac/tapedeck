@@ -19,7 +19,8 @@ as a MIDI device, and sound input/output devices.
 
 Tapes are read and stored as `.wav` files in the current
 directory. They are named with a letter (L,E,S,C) and a
-number (1 through 4), like `L1.wav`.
+number (1 through 4), like `L1.wav`. Generally tapedeck
+can only read `.wav` files that it has written.
 
 ## Interface Components
 

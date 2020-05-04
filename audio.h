@@ -1,12 +1,13 @@
 #include <pulse/simple.h>
+#include "main.h"
 
 // affects playback latency
-#define PLAYBACK_BUFFER_SIZE 4096
+#define PLAYBACK_BUFFER_SIZE (2048 * sizeof(sample))
 // affects record latency
-#define RECORD_BUFFER_SIZE 2048
+#define RECORD_BUFFER_SIZE (1024 * sizeof(sample))
 
 int audio_open(void);
 void audio_close(void);
-int audio_read(uint8_t * buffer);
-int audio_write(uint8_t * buffer);
+int audio_read(sample * buffer);
+int audio_write(sample * buffer);
 

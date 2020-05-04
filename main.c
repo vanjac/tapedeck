@@ -9,15 +9,10 @@
 #include "display.h"
 
 // return peak
-float mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
+float mix(sample * in1, sample * in2, sample * in3, sample * out,
          bool enable1, bool enable2, bool enable3,
          float vol1, float vol2, float vol3);
-void beep_sample(uint8_t * out);
-
-// read/write a two-byte sample
-// the byte at ptr and the byte after it will be used
-short read_sample(uint8_t * ptr);
-void write_sample(uint8_t * ptr, short sample);
+void beep_sample(sample * out);
 
 int beep_time;
 
@@ -44,10 +39,10 @@ int main(int argc, char *argv[]) {
 
     audio_in_volume = 1.0;
 
-    uint8_t audio_in_buffer[BUFFER_SIZE];
-    uint8_t tape_a_out_buffer[BUFFER_SIZE];
-    uint8_t tape_b_out_buffer[BUFFER_SIZE];
-    uint8_t mix_buffer[BUFFER_SIZE];
+    sample audio_in_buffer[BUFFER_SAMPLES];
+    sample tape_a_out_buffer[BUFFER_SAMPLES];
+    sample tape_b_out_buffer[BUFFER_SAMPLES];
+    sample mix_buffer[BUFFER_SAMPLES];
 
     while(!quit_flag) {
         if (instinct_update())
@@ -100,41 +95,29 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-short read_sample(uint8_t * ptr) {
-    return *(ptr + 1) << 8 | *ptr; // little endian
-}
-
-void write_sample(uint8_t * ptr, short sample) {
-    // little endian
-    *(ptr + 1) = (sample >> 8) & 0xFF;
-    *ptr = sample & 0xFF;
-}
-
-// depends on sample format being PA_SAMPLE_S16LE
-// Signed 16 bit, little endian
-float mix(uint8_t * in1, uint8_t * in2, uint8_t * in3, uint8_t * out,
+float mix(sample * in1, sample * in2, sample * in3, sample * out,
          bool enable1, bool enable2, bool enable3,
          float vol1, float vol2, float vol3) {
-    int peak = 0;
-    for (int i = 0; i < BUFFER_SIZE; i += BYTES_PER_SAMPLE) {
-        int mixed = 0;
+    float peak = 0;
+    for (int i = 0; i < BUFFER_SAMPLES; i++) {
+        sample mixed = 0;
         if (enable1)
-            mixed += read_sample(in1 + i) * vol1;
+            mixed += in1[i] * vol1;
         if (enable2)
-            mixed += read_sample(in2 + i) * vol2;
+            mixed += in2[i] * vol2;
         if (enable3)
-            mixed += read_sample(in3 + i) * vol3;
-        if (mixed > 32767)
-            mixed = 32767;
-        else if (mixed < -32768)
-            mixed = -32768;
+            mixed += in3[i] * vol3;
+        if (mixed > 1.0)
+            mixed = 1.0;
+        else if (mixed < -1.0)
+            mixed = -1.0;
         if (mixed > peak)
             peak = mixed;
         else if (-mixed > peak)
             peak = -mixed;
-        write_sample(out + i, mixed);
+        out[i] = mixed;
     }
-    return peak / 32768.0;
+    return peak;
 }
 
 unsigned int time_millis(void) {
@@ -156,12 +139,13 @@ void beep(void) {
     beep_time = BEEP_FRAMES;
 }
 
-void beep_sample(uint8_t * out) {
-    for (int i = 0; i < BUFFER_SIZE; i += OUT_BYTES_PER_FRAME) {
-        short sample = beep_time * 1486; // should be about 1000 Hz
-        sample /= 6;
+void beep_sample(sample * out) {
+    for (int i = 0; i < BUFFER_SAMPLES; i += OUT_CHANNELS) {
+        short isample = beep_time * 1486; // should be about 1000 Hz
+        isample /= 6;
+        sample fsample = isample / 32768.0;
         for (int c = 0; c < OUT_CHANNELS; c++) {
-            write_sample(out + i + BYTES_PER_SAMPLE * c, sample);
+            out[i + c] = fsample;
         }
         beep_time--;
     }

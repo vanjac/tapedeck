@@ -16,6 +16,7 @@
 #define OUT_CUE_ID 2
 
 // https://sites.google.com/site/musicgapi/technical-documents/wav-file-format
+// http://www-mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html
 
 
 int read_file(FILE * file, Tape * tape);
@@ -33,7 +34,7 @@ int write_file(FILE * file, Tape * tape);
 void write_fourcc(FILE * file, char * fourcc);
 void write_uint16(FILE * file, unsigned short value);
 void write_uint32(FILE * file, unsigned int value);
-void write_cue(FILE * file, unsigned int id, unsigned int position);
+void write_cue(FILE * file, unsigned int id, unsigned int sample_num);
 
 
 void path_for_tape(Tape * tape, char * path_out) {
@@ -156,34 +157,35 @@ int read_chunk_cue(FILE * file, Tape * tape) {
     for (int i = 0; i < num_cues; i++) {
         unsigned int cue_id = read_uint32(file);
         fseek(file, 12, SEEK_CUR);
-        unsigned int cue_pos = read_uint32(file);
+        unsigned int sample_num = read_uint32(file) / sizeof(sample);
         fseek(file, 4, SEEK_CUR);
 
-        if (cue_pos > TAPE_MAX(tape) - tape->pt_start) {
+        if (sample_num > TAPE_MAX(tape) - tape->pt_start) {
             fprintf(stderr, "Cue past end of tape!\n");
             error = 1;
-            cue_pos = TAPE_MAX(tape) - tape->pt_start;
+            sample_num = TAPE_MAX(tape) - tape->pt_start;
         }
         if (cue_id == IN_CUE_ID)
-            tape->pt_in = cue_pos + tape->pt_start;
+            tape->pt_in = sample_num + tape->pt_start;
         else if (cue_id = OUT_CUE_ID)
-            tape->pt_out = cue_pos + tape->pt_start;
+            tape->pt_out = sample_num + tape->pt_start;
     }
     return error;
 }
 
 int read_chunk_data(FILE * file, unsigned int chunk_size, Tape * tape) {
     int error = 0;
-    if (chunk_size > TAPE_SIZE) {
+    int chunk_samples = chunk_size / sizeof(sample);
+    if (chunk_samples > TAPE_SAMPLES) {
         error = 1;
         fprintf(stderr, "File is too large!\n");
         move_all_tape_points(tape, tape->audio_data - tape->pt_start);
-        chunk_size = TAPE_SIZE;
-    } else if (chunk_size > TAPE_SIZE / 2) {
-        move_all_tape_points(tape, -((long)chunk_size - TAPE_SIZE/2) / 2);
+        chunk_samples = TAPE_SAMPLES;
+    } else if (chunk_samples > TAPE_SAMPLES / 2) {
+        move_all_tape_points(tape, -(chunk_samples - TAPE_SAMPLES/2) / 2);
     }
-    fread(tape->pt_start, 1, chunk_size, file);
-    tape->pt_end = tape->pt_start + chunk_size;
+    fread(tape->pt_start, 1, chunk_samples * sizeof(sample), file);
+    tape->pt_end = tape->pt_start + chunk_samples;
     return error;
 }
 
@@ -212,7 +214,7 @@ int save_tape(Tape * tape) {
 int write_file(FILE * file, Tape * tape) {
     write_fourcc(file, "RIFF");
 
-    int data_chunk_size = tape->pt_end - tape->pt_start;
+    int data_chunk_size = (tape->pt_end - tape->pt_start) * sizeof(sample);
     int riff_size = 4 + (8 + FMT_CHUNK_SIZE) + (8 + data_chunk_size)
         + (8 + CUE_CHUNK_SIZE);
     write_uint32(file, riff_size);
@@ -221,12 +223,12 @@ int write_file(FILE * file, Tape * tape) {
 
     write_fourcc(file, FMT_CHUNK_ID); // begin format chunk
     write_uint32(file, FMT_CHUNK_SIZE);
-    write_uint16(file, 1); // format code
+    write_uint16(file, 3); // format code: IEEE float
     write_uint16(file, TAPE_CHANNELS); // num channels
     write_uint32(file, FRAME_RATE); // sample rate
-    write_uint32(file, 45328); // data rate
-    write_uint16(file, TAPE_BYTES_PER_FRAME); // block size
-    write_uint16(file, BYTES_PER_SAMPLE * 8); // bits per sample
+    write_uint32(file, FRAME_RATE * TAPE_CHANNELS * sizeof(sample)); // data rate
+    write_uint16(file, TAPE_CHANNELS * sizeof(sample)); // block size
+    write_uint16(file, sizeof(sample) * 8); // bits per sample
 
     write_fourcc(file, CUE_CHUNK_ID); // begin cue chunk
     write_uint32(file, CUE_CHUNK_SIZE);
@@ -255,11 +257,11 @@ void write_uint32(FILE * file, unsigned int value) {
         fputc((value >> (i * 8)) & 0xFF, file);
 }
 
-void write_cue(FILE * file, unsigned int id, unsigned int position) {
+void write_cue(FILE * file, unsigned int id, unsigned int sample_num) {
     write_uint32(file, id);
     write_uint32(file, 0);
     write_fourcc(file, DATA_CHUNK_ID);
     write_uint32(file, 0);
-    write_uint32(file, position);
-    write_uint32(file, position);
+    write_uint32(file, sample_num * sizeof(sample));
+    write_uint32(file, sample_num * sizeof(sample));
 }
