@@ -153,7 +153,7 @@ float exponential_volume_to_linear(float exponential) {
 }
 
 void beep(void) {
-    beep_time = BEEP_SAMPLES;
+    beep_time = BEEP_FRAMES;
 }
 
 void beep_sample(uint8_t * out) {
