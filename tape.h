@@ -34,9 +34,9 @@ int tape_init(Tape * tape);
 void tape_reset(Tape * tape);
 void tape_destroy(Tape * tape);
 // return false if tape isn't playing and nothing was written to out_buffer
-int tape_playback(Tape * tape, sample * out_buffer);
-void tape_record(Tape * tape, sample * in_buffer);
-void tape_move(Tape * tape);
+int tape_playback(Tape * tape, sample * out_buffer, int num_samples);
+void tape_record(Tape * tape, sample * in_buffer, int num_samples);
+void tape_move(Tape * tape, int num_samples);
 // resize tape in/out points to include pt_head
 // return false if tape couldn't expand past audio memory
 int tape_expand(Tape * tape);

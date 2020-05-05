@@ -9,10 +9,10 @@
 #include "display.h"
 
 // return peak
-float mix(sample * in1, sample * in2, sample * in3, sample * out,
+float mix(sample * in1, sample * in2, sample * in3, sample * out, int num_samples,
          bool enable1, bool enable2, bool enable3,
          float vol1, float vol2, float vol3);
-void beep_sample(sample * out);
+void beep_sample(sample * out, int num_samples);
 
 int beep_time;
 
@@ -49,35 +49,35 @@ int main(int argc, char *argv[]) {
             break;
         interface_update();
 
-        if (audio_read(audio_in_buffer))
+        if (audio_read(audio_in_buffer, BUFFER_SAMPLES))
             break;
-        int a_play = tape_playback(&tape_a, tape_a_out_buffer);
-        int b_play = tape_playback(&tape_b, tape_b_out_buffer);
+        int a_play = tape_playback(&tape_a, tape_a_out_buffer, BUFFER_SAMPLES);
+        int b_play = tape_playback(&tape_b, tape_b_out_buffer, BUFFER_SAMPLES);
 
         // mix recording
-        mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer, mix_buffer,
+        mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer, mix_buffer, BUFFER_SAMPLES,
             a_play && tape_a.loopback, b_play && tape_b.loopback, true,
             tape_a.volume, tape_b.volume,
             audio_in_volume);
-        tape_record(&tape_a, mix_buffer);
-        tape_record(&tape_b, mix_buffer);
+        tape_record(&tape_a, mix_buffer, BUFFER_SAMPLES);
+        tape_record(&tape_b, mix_buffer, BUFFER_SAMPLES);
 
 
         // mix playback
-        float peak = mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer, mix_buffer,
+        float peak = mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer, mix_buffer, BUFFER_SAMPLES,
             a_play, b_play, true,
             tape_a.volume, tape_b.volume,
             audio_in_volume);
         if (beep_time)
-            beep_sample(mix_buffer);
+            beep_sample(mix_buffer, BUFFER_SAMPLES);
 
         draw_level(exponential_volume_to_linear(peak));
 
-        if (audio_write(mix_buffer))
+        if (audio_write(mix_buffer, BUFFER_SAMPLES))
             break;
 
-        tape_move(&tape_a);
-        tape_move(&tape_b);
+        tape_move(&tape_a, BUFFER_SAMPLES);
+        tape_move(&tape_b, BUFFER_SAMPLES);
 
         display_update();
     }
@@ -95,11 +95,11 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-float mix(sample * in1, sample * in2, sample * in3, sample * out,
+float mix(sample * in1, sample * in2, sample * in3, sample * out, int num_samples,
          bool enable1, bool enable2, bool enable3,
          float vol1, float vol2, float vol3) {
     float peak = 0;
-    for (int i = 0; i < BUFFER_SAMPLES; i++) {
+    for (int i = 0; i < num_samples; i++) {
         sample mixed = 0;
         if (enable1)
             mixed += in1[i] * vol1;
@@ -139,8 +139,8 @@ void beep(void) {
     beep_time = BEEP_FRAMES;
 }
 
-void beep_sample(sample * out) {
-    for (int i = 0; i < BUFFER_SAMPLES; i += OUT_CHANNELS) {
+void beep_sample(sample * out, int num_samples) {
+    for (int i = 0; i < num_samples; i += OUT_CHANNELS) {
         short isample = beep_time * 1486; // should be about 1000 Hz
         isample /= 6;
         sample fsample = isample / 32768.0;

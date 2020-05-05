@@ -8,6 +8,6 @@
 
 int audio_open(void);
 void audio_close(void);
-int audio_read(sample * buffer);
-int audio_write(sample * buffer);
+int audio_read(sample * buffer, int num_samples);
+int audio_write(sample * buffer, int num_samples);
 

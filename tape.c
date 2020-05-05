@@ -31,7 +31,7 @@ void tape_destroy(Tape * tape) {
     free(tape->audio_data);
 }
 
-int tape_playback(Tape * tape, sample * out_buffer) {
+int tape_playback(Tape * tape, sample * out_buffer, int num_samples) {
     if (!(tape->is_playing || tape->jog_flag)) {
         return 0;
     }
@@ -40,12 +40,12 @@ int tape_playback(Tape * tape, sample * out_buffer) {
         return 0;
     }
 
-    for (int i = 0; i < BUFFER_SAMPLES; i++)
+    for (int i = 0; i < num_samples; i++)
         out_buffer[i] = *(tape->pt_head + i);
     return 1;
 }
 
-void tape_record(Tape * tape, sample * in_buffer) {
+void tape_record(Tape * tape, sample * in_buffer, int num_samples) {
     if (!(tape->is_playing && tape->record))
         return;
     if (tape->pt_head >= tape->pt_end) {
@@ -56,18 +56,18 @@ void tape_record(Tape * tape, sample * in_buffer) {
             beep();
         } else {
             // extend tape. will be recorded to so no need to erase
-            tape->pt_end = tape->pt_head + BUFFER_SAMPLES;
+            tape->pt_end = tape->pt_head + num_samples;
         }
     }
-    for (int i = 0; i < BUFFER_SAMPLES; i++)
+    for (int i = 0; i < num_samples; i++)
         *(tape->pt_head + i) = in_buffer[i];
 }
 
-void tape_move(Tape * tape) {
+void tape_move(Tape * tape, int num_samples) {
     if (tape->is_playing) {
-        tape->pt_head += BUFFER_SAMPLES;
+        tape->pt_head += num_samples;
 
-        if (tape->pt_head - BUFFER_SAMPLES < tape->pt_out
+        if (tape->pt_head - num_samples < tape->pt_out
             && tape->pt_head >= tape->pt_out) {
             // if passed out point, do out point action
             switch(tape->out_point_action) {

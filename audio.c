@@ -63,18 +63,18 @@ void audio_close(void) {
     pa_simple_free(record_stream);
 }
 
-int audio_read(sample * buffer) {
+int audio_read(sample * buffer, int num_samples) {
     int pa_error;
-    if (pa_simple_read(record_stream, buffer, BUFFER_SAMPLES * sizeof(sample), &pa_error) < 0) {
+    if (pa_simple_read(record_stream, buffer, num_samples * sizeof(sample), &pa_error) < 0) {
         fprintf(stderr, "Read failed: %s\n", pa_strerror(pa_error));
         return 1;
     }
     return 0;
 }
 
-int audio_write(sample * buffer) {
+int audio_write(sample * buffer, int num_samples) {
     int pa_error;
-    if (pa_simple_write(play_stream, buffer, BUFFER_SAMPLES * sizeof(sample), &pa_error) < 0) {
+    if (pa_simple_write(play_stream, buffer, num_samples * sizeof(sample), &pa_error) < 0) {
         fprintf(stderr, "Write failed: %s\n", pa_strerror(pa_error));
         return 1;
     }

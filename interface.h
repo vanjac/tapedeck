@@ -1,5 +1,6 @@
 #define BLINK_RATE 256
 #define HOLD_TIME 700
+#define JOG_FRAMES BUFFER_FRAMES
 #define JOG_REPEAT_COUNT 2
 #define SEEK_SPEED 16
 

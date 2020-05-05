@@ -240,7 +240,7 @@ void tape_jog(Tape * tape, int value) {
     if (value >= 64)
         value -= 128;
     tape->jog_flag = JOG_REPEAT_COUNT;
-    tape->pt_head += value * BUFFER_SAMPLES;
+    tape->pt_head += value * JOG_FRAMES * TAPE_CHANNELS;
     if (tape->record) {
         if (tape_expand(tape))
             beep();
