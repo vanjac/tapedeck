@@ -7,6 +7,10 @@ int tape_init(Tape * tape) {
     tape->audio_data = malloc(TAPE_SAMPLES * sizeof(sample));
     if (!(tape->audio_data))
         return 1;
+    
+    // mixer settings (not reset by tape_reset)
+    tape->volume = 1.0;
+    tape->aux_send = false;
 
     tape_reset(tape);
     return 0;
@@ -21,9 +25,7 @@ void tape_reset(Tape * tape) {
 
     tape->is_playing = false;
     tape->record = false;
-    tape->aux_send = false;
     tape->out_point_action = OUT_CONTINUE;
-    tape->volume = 1.0;
     tape->jog_flag = 0;
 }
 
