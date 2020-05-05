@@ -5,6 +5,7 @@
 #include "file.h"
 #include "main.h"
 #include "display.h"
+#include "audio.h"
 
 void tape_button_pressed(Tape * tape, int button);
 void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink);
@@ -30,6 +31,9 @@ void button_pressed(int button) {
     switch (button) {
     case BTN_SCRATCH:
         link_tapes = !link_tapes;
+        break;
+    case BTN_UP:
+        audio_flush();
         break;
     case BTN_DOWN:
         quit_flag = true;

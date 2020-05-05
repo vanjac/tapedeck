@@ -81,3 +81,10 @@ int audio_write(sample * buffer, int num_samples) {
     return 0;
 }
 
+int audio_flush(void) {
+    int pa_error;
+    if (pa_simple_flush(play_stream, &pa_error) < 0
+        || pa_simple_flush(record_stream, &pa_error) < 0) {
+        fprintf(stderr, "Flush failed: %s\n", pa_strerror(pa_error));
+    }
+}

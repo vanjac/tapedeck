@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <pulse/simple.h>
 #include "main.h"
 
 // 6 minutes 20 seconds of audio
