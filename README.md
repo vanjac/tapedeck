@@ -15,7 +15,8 @@ Required development libraries: PulseAudio, ncurses
 
 Build with `make`. Compiles to `tapedeck.out`. Run in a
 terminal. To run you must have the DJ board connected
-as a MIDI device, and sound input/output devices.
+as a MIDI device, one audio input device, and two audio
+output devices (one of which is defined in `audio.c`).
 
 Tapes are read and stored as `.wav` files in the current
 directory. They are named with a letter (L,E,S,C) and a
@@ -31,19 +32,25 @@ virtual tape decks, each of which is loaded with one
 virtual tape at a time. A tape has boundaries which can
 expand, an In point, and an Out point. The controls for
 each tape mirror each other on the left and right sides
-of the DJ board.
+of the console.
 
 ### Mixer
 
+The controls for the mixer are in the center section of
+the console.
+
 The mixer has 3 inputs: both tape decks and the external
 audio input. Each has a volume control, and their
-signals are summed together.
+signals are summed together. All mixer inputs are sent
+to any tape deck with recording enabled.
 
-The mixer has two outputs: Monitor and Loopback. The
-Monitor output includes all inputs and is sent to
-the speakers. The Loopback output is sent to any tapes
-with recording enabled. Tapes are only included in the
-Loopback output if their Loopback switch is on.
+The mixer has two outputs: Monitor and Aux-Send.
+External input is sent to monitor. Tape output can be
+toggled between monitor and aux-send output (see below).
+
+It is often useful to connect a loopback cable from the
+aux-send to input. This can be used to copy/mix data
+between tapes.
 
 ## DJ Board Controls
 
@@ -60,8 +67,8 @@ To mix audio instead, enable Loopback.
     While recording is enabled, the tape's boundaries
     can expand if you jog/play past them.
 
-- Headphone button: Loopback switch. See Mixer section
-above.
+- Headphone button: Toggle tape output to aux-send. See
+Mixer section above.
 - -/+ buttons: Set in/out point. Hold to cut the
 beginning/end of the tape off at this point.
 - RW button: Jump backwards to out point, in point, or

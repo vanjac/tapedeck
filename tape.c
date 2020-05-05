@@ -21,7 +21,7 @@ void tape_reset(Tape * tape) {
 
     tape->is_playing = false;
     tape->record = false;
-    tape->loopback = false;
+    tape->aux_send = false;
     tape->out_point_action = OUT_CONTINUE;
     tape->volume = 1.0;
     tape->jog_flag = 0;

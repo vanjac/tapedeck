@@ -3,7 +3,11 @@
 #include <pulse/error.h>
 #include "main.h"
 
+// pactl list | grep -A6 'Sink #'
+#define AUX_SEND_DEVICE "alsa_output.usb-C-Media_Electronics_Inc._USB_Audio_Device-00.analog-stereo"
+
 pa_simple *play_stream;
+pa_simple *aux_send_stream;
 pa_simple *record_stream;
 
 int audio_open(void) {
@@ -41,6 +45,20 @@ int audio_open(void) {
         fprintf(stderr, "Couldn't open playback stream: %s\n", pa_strerror(pa_error));
         return 1;
     }
+    aux_send_stream = pa_simple_new(
+        NULL,
+        "tapedeck",
+        PA_STREAM_PLAYBACK,
+        AUX_SEND_DEVICE,
+        "aux send",
+        &sample_spec,
+        NULL,
+        &playback_buff_attr,
+        &pa_error);
+    if (!aux_send_stream) {
+        fprintf(stderr, "Couldn't open aux-send stream: %s\n", pa_strerror(pa_error));
+        return 1;
+    }
     record_stream = pa_simple_new(
         NULL,               // default server
         "tapedeck",         // name of app
@@ -60,6 +78,7 @@ int audio_open(void) {
 
 void audio_close(void) {
     pa_simple_free(play_stream);
+    pa_simple_free(aux_send_stream);
     pa_simple_free(record_stream);
 }
 
@@ -81,9 +100,19 @@ int audio_write(sample * buffer, int num_samples) {
     return 0;
 }
 
+int audio_write_aux(sample * buffer, int num_samples) {
+    int pa_error;
+    if (pa_simple_write(aux_send_stream, buffer, num_samples * sizeof(sample), &pa_error) < 0) {
+        fprintf(stderr, "Aux write failed: %s\n", pa_strerror(pa_error));
+        return 1;
+    }
+    return 0;
+}
+
 int audio_flush(void) {
     int pa_error;
     if (pa_simple_flush(play_stream, &pa_error) < 0
+        || pa_simple_flush(aux_send_stream, &pa_error) < 0
         || pa_simple_flush(record_stream, &pa_error) < 0) {
         fprintf(stderr, "Flush failed: %s\n", pa_strerror(pa_error));
     }

@@ -19,9 +19,9 @@ int beep_time;
 int main(int argc, char *argv[]) {
     if (instinct_open())
         return 1;
-    if (display_open())
-        return 1;
     if (audio_open())
+        return 1;
+    if (display_open())
         return 1;
     if (tape_init(&tape_a))
         return 1;
@@ -55,19 +55,24 @@ int main(int argc, char *argv[]) {
         int b_play = tape_playback(&tape_b, tape_b_out_buffer, BUFFER_SAMPLES);
 
         // mix recording
-        mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer, mix_buffer, BUFFER_SAMPLES,
-            a_play && tape_a.loopback, b_play && tape_b.loopback, true,
-            tape_a.volume, tape_b.volume,
-            audio_in_volume);
+        mix(audio_in_buffer, NULL, NULL, mix_buffer, BUFFER_SAMPLES,
+            true, false, false,
+            audio_in_volume, 0, 0);
         tape_record(&tape_a, mix_buffer, BUFFER_SAMPLES);
         tape_record(&tape_b, mix_buffer, BUFFER_SAMPLES);
-
+        
+        // mix aux send
+        mix(tape_a_out_buffer, tape_b_out_buffer, NULL, mix_buffer, BUFFER_SAMPLES,
+            a_play && tape_a.aux_send, b_play && tape_b.aux_send, false,
+            tape_a.volume, tape_b.volume, 0);
+        if (audio_write_aux(mix_buffer, BUFFER_SAMPLES))
+            break;
 
         // mix playback
-        float peak = mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer, mix_buffer, BUFFER_SAMPLES,
-            a_play, b_play, true,
-            tape_a.volume, tape_b.volume,
-            audio_in_volume);
+        float peak = mix(tape_a_out_buffer, tape_b_out_buffer, audio_in_buffer,
+            mix_buffer, BUFFER_SAMPLES,
+            a_play && !tape_a.aux_send, b_play && !tape_b.aux_send, true,
+            tape_a.volume, tape_b.volume, audio_in_volume);
         if (beep_time)
             beep_sample(mix_buffer, BUFFER_SAMPLES);
 

@@ -107,7 +107,7 @@ void tape_button_pressed(Tape * tape, int button) {
         tape->record = !tape->record;
         break;
     case BTN_DECK_LISTEN:
-        tape->loopback = !tape->loopback;
+        tape->aux_send = !tape->aux_send;
         break;
 // navigation
     case BTN_DECK_PREV:
@@ -192,7 +192,7 @@ void tape_interface_update(Tape * tape, unsigned int tmillis, bool blink) {
 
     set_led(btn_start + BTN_DECK_PLAY, tape->is_playing);
     set_led(btn_start + BTN_DECK_CUE, tape->record);
-    set_led(btn_start + BTN_DECK_LISTEN, tape->loopback);
+    set_led(btn_start + BTN_DECK_LISTEN, tape->aux_send);
 
     switch(tape->out_point_action) {
     case OUT_CONTINUE:
