@@ -16,7 +16,7 @@ Required development libraries: PulseAudio, ncurses
 Build with `make`. Compiles to `tapedeck.out`. Run in a
 terminal. To run you must have the DJ board connected
 as a MIDI device, one audio input device, and two audio
-output devices (one of which is defined in `audio.c`).
+output devices. Audio device names are set in `audio.c`.
 
 Tapes are read and stored as `.wav` files in the current
 directory. They are named with a letter (L,E,S,C) and a

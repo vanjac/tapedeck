@@ -5,6 +5,8 @@
 
 // pactl list | grep -A6 'Sink #'
 #define AUX_SEND_DEVICE "alsa_output.usb-C-Media_Electronics_Inc._USB_Audio_Device-00.analog-stereo"
+// pactl list | grep -A6 'Source #'
+#define RECORD_DEVICE "alsa_input.usb-C-Media_Electronics_Inc._USB_Audio_Device-00.analog-mono"
 
 pa_simple *play_stream;
 pa_simple *aux_send_stream;
@@ -63,7 +65,7 @@ int audio_open(void) {
         NULL,               // default server
         "tapedeck",         // name of app
         PA_STREAM_RECORD,
-        NULL,               // default device
+        RECORD_DEVICE,
         "record",           // stream description
         &sample_spec,
         NULL,               // default channel map
