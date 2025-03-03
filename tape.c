@@ -3,6 +3,9 @@
 #include <string.h>
 #include "main.h"
 
+// defined in tape.h:
+Tape tape_a, tape_b;
+
 int tape_init(Tape * tape) {
     tape->audio_data = malloc(TAPE_SAMPLES * sizeof(sample));
     if (!(tape->audio_data))

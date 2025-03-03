@@ -1,6 +1,8 @@
 #include "display.h"
 #include <ncurses.h>
 
+bool display_pixels[DISPLAY_LENGTH * DISPLAY_ROWS];
+
 void force_set_pixel(int num, bool value);
 void all_pixels_off(void);
 

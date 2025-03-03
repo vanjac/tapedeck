@@ -1,3 +1,5 @@
+#pragma once
+
 #define BLINK_RATE 256
 #define HOLD_TIME 700
 #define JOG_FRAMES BUFFER_FRAMES

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdbool.h>
 
 #define DISPLAY_LENGTH 10
@@ -8,5 +10,5 @@ void display_close(void);
 void set_pixel(int num, bool value);
 void display_update(void);
 
-bool display_pixels[DISPLAY_LENGTH * DISPLAY_ROWS];
+extern bool display_pixels[DISPLAY_LENGTH * DISPLAY_ROWS];
 

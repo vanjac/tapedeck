@@ -14,6 +14,11 @@ float mix(sample * in1, sample * in2, sample * in3, sample * out, int num_sample
          float vol1, float vol2, float vol3);
 void beep_sample(sample * out, int num_samples);
 
+// defined in main.h:
+bool quit_flag;
+float audio_in_volume;
+bool link_tapes;
+
 int beep_time;
 
 int main(int argc, char *argv[]) {

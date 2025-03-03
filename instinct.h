@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdbool.h>
 
 // https://www.alsa-project.org/main/index.php/ALSA_Library_API
@@ -73,9 +75,9 @@
 
 // 0 for not currently pressed
 // nonzero for time button was pressed
-unsigned int button_presses[NUM_BUTTONS];
+extern unsigned int button_presses[NUM_BUTTONS];
 
-bool led_states[NUM_BUTTONS];
+extern bool led_states[NUM_BUTTONS];
 
 int instinct_open(void);
 void instinct_close(void);

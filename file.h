@@ -1,3 +1,5 @@
+#pragma once
+
 #include "tape.h"
 
 int load_tape(Tape * tape);

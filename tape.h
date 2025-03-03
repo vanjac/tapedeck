@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdbool.h>
 #include "main.h"
 
@@ -27,7 +29,7 @@ typedef struct {
     unsigned short buttons_start; // start of MIDI notes for this tape
 } Tape;
 
-Tape tape_a, tape_b;
+extern Tape tape_a, tape_b;
 
 int tape_init(Tape * tape);
 void tape_reset(Tape * tape);

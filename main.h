@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdbool.h>
 
 #define TAPE_CHANNELS 2
@@ -9,10 +11,10 @@
 
 typedef float sample;
 
-bool quit_flag;
+extern bool quit_flag;
 
-float audio_in_volume;
-bool link_tapes;
+extern float audio_in_volume;
+extern bool link_tapes;
 
 float linear_volume_to_exponential(float linear);
 float exponential_volume_to_linear(float exponential);

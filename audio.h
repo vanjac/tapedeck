@@ -1,3 +1,5 @@
+#pragma once
+
 #include <pulse/simple.h>
 #include "main.h"
 

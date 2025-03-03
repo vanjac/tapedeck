@@ -9,6 +9,10 @@
 
 #define MIDI_MESSAGE_SIZE 3
 
+// defined in instinct.h:
+unsigned int button_presses[NUM_BUTTONS];
+bool led_states[NUM_BUTTONS];
+
 int midi_fd;
 
 void interpret_midi_message(unsigned char b1, unsigned char b2, unsigned char b3);
